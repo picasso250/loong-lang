@@ -1,3 +1,20 @@
+# 解释器 - Loong
+# 该程序实现了一个简单的解释器，能够解析和执行基本的数学表达式、变量赋值、三元运算符、函数定义与调用等功能。
+# 使用 sly 库进行词法分析与语法分析，支持以下功能：
+# - 基本的算术运算：加法、减法、乘法、除法
+# - 比较运算符：大于、小于、等于
+# - 变量赋值与引用
+# - 支持三元运算符
+# - 支持函数定义和调用
+
+# 语法示例：
+# 1. 变量赋值：a := 10
+# 2. 算术表达式：a + b * 2
+# 3. 条件运算符：a > 10 ? "Yes" : "No"
+# 4. 函数定义与调用：
+#    函数定义：f := x => x + 2
+#    函数调用：f 5  # 返回 7
+
 from sly import Lexer, Parser
 
 # 词法分析器
@@ -103,12 +120,12 @@ class CalcParser(Parser):
     # 函数定义
     @_('NAME ARROW expr')
     def expr(self, p):
-        return ('function_def', p.NAME, p.expr)
+        return ('func_def', p.NAME, p.expr)
 
     # 函数调用
     @_('expr expr')
     def expr(self, p):
-        return ('function_call', p.expr0, p.expr1)
+        return ('func_call', p.expr0, p.expr1)
 
 # 虚拟机
 class VirtualMachine:
@@ -153,9 +170,9 @@ class VirtualMachine:
         elif node[0] == 'ternary':
             cond = self.eval(node[1])
             return self.eval(node[2]) if cond else self.eval(node[3])
-        elif node[0] == 'function_def':
+        elif node[0] == 'func_def':
             return node
-        elif node[0] == 'function_call':
+        elif node[0] == 'func_call':
             # Call the function with the argument
             func_name = self.eval(node[1])
             arg_value = self.eval(node[2])
