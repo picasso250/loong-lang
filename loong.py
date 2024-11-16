@@ -1,16 +1,17 @@
 # -----------------------------------------------------------------------------
-# calc.py
+# loong.py
 # -----------------------------------------------------------------------------
 
 from sly import Lexer, Parser
 
 class CalcLexer(Lexer):
-    tokens = { NAME, NUMBER }
+    tokens = { NAME, NUMBER, ASSIGN }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=' }
 
     # Tokens
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
+    ASSIGN = ':='
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -29,15 +30,17 @@ class CalcParser(Parser):
     tokens = CalcLexer.tokens
 
     precedence = (
-        ('left', '+', '-'),
-        ('left', '*', '/'),
-        ('right', 'UMINUS'),
-        )
+        ('right', '?', ':'),           # Ternary operator (lowest precedence)
+        ('left', '>', '<', '='),     # Comparison operators
+        ('left', '+', '-'),           # Addition and subtraction
+        ('left', '*', '/'),           # Multiplication and division
+        ('right', 'UMINUS'),          # Unary minus
+    )
 
     def __init__(self):
-        self.names = { }
+        self.names = {}
 
-    @_('NAME "=" expr')
+    @_('NAME ASSIGN expr')
     def statement(self, p):
         self.names[p.NAME] = p.expr
 
@@ -45,6 +48,7 @@ class CalcParser(Parser):
     def statement(self, p):
         print(p.expr)
 
+    # Arithmetic operators
     @_('expr "+" expr')
     def expr(self, p):
         return p.expr0 + p.expr1
@@ -61,14 +65,35 @@ class CalcParser(Parser):
     def expr(self, p):
         return p.expr0 / p.expr1
 
+    # Unary minus
     @_('"-" expr %prec UMINUS')
     def expr(self, p):
         return -p.expr
 
+    # Parentheses
     @_('"(" expr ")"')
     def expr(self, p):
         return p.expr
 
+    # Comparison operators
+    @_('expr ">" expr')
+    def expr(self, p):
+        return p.expr0 > p.expr1
+
+    @_('expr "<" expr')
+    def expr(self, p):
+        return p.expr0 < p.expr1
+
+    @_('expr "=" expr')
+    def expr(self, p):
+        return p.expr0 == p.expr1
+
+    # Ternary operator
+    @_('expr "?" expr ":" expr')
+    def expr(self, p):
+        return p.expr1 if p.expr0 else p.expr2
+
+    # Numbers and names
     @_('NUMBER')
     def expr(self, p):
         return p.NUMBER
