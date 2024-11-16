@@ -1,15 +1,11 @@
-# -----------------------------------------------------------------------------
-# loong.py
-# -----------------------------------------------------------------------------
-
 from sly import Lexer, Parser
 
+# 词法分析器
 class CalcLexer(Lexer):
     tokens = { NAME, NUMBER, ASSIGN }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=' }
 
-    # Tokens
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     ASSIGN = ':='
 
@@ -26,6 +22,7 @@ class CalcLexer(Lexer):
         print("Illegal character '%s'" % t.value[0])
         self.index += 1
 
+# 语法分析器
 class CalcParser(Parser):
     tokens = CalcLexer.tokens
 
@@ -40,79 +37,120 @@ class CalcParser(Parser):
     def __init__(self):
         self.names = {}
 
+    # 语句
     @_('NAME ASSIGN expr')
     def statement(self, p):
-        self.names[p.NAME] = p.expr
+        return ('assign', p.NAME, p.expr)
 
     @_('expr')
     def statement(self, p):
-        print(p.expr)
+        return p.expr
 
-    # Arithmetic operators
+    # 运算符
     @_('expr "+" expr')
     def expr(self, p):
-        return p.expr0 + p.expr1
+        return ('binop', '+', p.expr0, p.expr1)
 
     @_('expr "-" expr')
     def expr(self, p):
-        return p.expr0 - p.expr1
+        return ('binop', '-', p.expr0, p.expr1)
 
     @_('expr "*" expr')
     def expr(self, p):
-        return p.expr0 * p.expr1
+        return ('binop', '*', p.expr0, p.expr1)
 
     @_('expr "/" expr')
     def expr(self, p):
-        return p.expr0 / p.expr1
+        return ('binop', '/', p.expr0, p.expr1)
 
-    # Unary minus
     @_('"-" expr %prec UMINUS')
     def expr(self, p):
-        return -p.expr
+        return ('unaryop', '-', p.expr)
 
-    # Parentheses
     @_('"(" expr ")"')
     def expr(self, p):
         return p.expr
 
-    # Comparison operators
+    # 比较运算符
     @_('expr ">" expr')
     def expr(self, p):
-        return p.expr0 > p.expr1
+        return ('binop', '>', p.expr0, p.expr1)
 
     @_('expr "<" expr')
     def expr(self, p):
-        return p.expr0 < p.expr1
+        return ('binop', '<', p.expr0, p.expr1)
 
     @_('expr "=" expr')
     def expr(self, p):
-        return p.expr0 == p.expr1
+        return ('binop', '=', p.expr0, p.expr1)
 
-    # Ternary operator
+    # 三元运算符
     @_('expr "?" expr ":" expr')
     def expr(self, p):
-        return p.expr1 if p.expr0 else p.expr2
+        return ('ternary', p.expr0, p.expr1, p.expr2)
 
-    # Numbers and names
+    # 数字
     @_('NUMBER')
     def expr(self, p):
-        return p.NUMBER
+        return ('num', p.NUMBER)
 
+    # 变量名
     @_('NAME')
     def expr(self, p):
-        try:
-            return self.names[p.NAME]
-        except LookupError:
-            print("Undefined name '%s'" % p.NAME)
-            return 0
+        return ('name', p.NAME)
+
+# 虚拟机
+class VirtualMachine:
+    def __init__(self):
+        self.variables = {}
+
+    def set(self, name, value):
+        self.variables[name] = value
+
+    def get(self, name, default=None):
+        return self.variables.get(name, default)
+
+    def eval(self, node):
+        if node[0] == 'num':
+            return node[1]
+        elif node[0] == 'name':
+            return self.get(node[1], 0)
+        elif node[0] == 'binop':
+            left = self.eval(node[2])
+            right = self.eval(node[3])
+            if node[1] == '+':
+                return left + right
+            elif node[1] == '-':
+                return left - right
+            elif node[1] == '*':
+                return left * right
+            elif node[1] == '/':
+                return left / right
+            elif node[1] == '>':
+                return left > right
+            elif node[1] == '<':
+                return left < right
+            elif node[1] == '=':
+                return left == right
+        elif node[0] == 'unaryop':
+            return -self.eval(node[2])
+        elif node[0] == 'assign':
+            self.set(node[1], self.eval(node[2]))
+        elif node[0] == 'ternary':
+            cond = self.eval(node[1])
+            return self.eval(node[2]) if cond else self.eval(node[3])
 
 if __name__ == '__main__':
     lexer = CalcLexer()
     parser = CalcParser()
+    vm = VirtualMachine()
+
     while True:
         try:
             text = input('calc > ')
         except EOFError:
             break
         if text:
-            parser.parse(lexer.tokenize(text))
+            ast = parser.parse(lexer.tokenize(text))
+            print(ast)
+            print(vm.eval(ast))
