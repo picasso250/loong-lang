@@ -122,7 +122,7 @@ class LoongParser(Parser):
     @_(' "("  ")" ARROW expr')
     def expr(self, p):
         return ('func_def', [], p.expr)
-    @_(' "(" NAME ")" ARROW expr')
+    @_(' "(" NAME ")" ARROW expr') # 不知道为何需要这个，但确实需要这个
     def expr(self, p):
         return ('func_def', [p.NAME], p.expr)
     @_(' "(" param_list ")" ARROW expr')
