@@ -2,12 +2,13 @@ from sly import Lexer, Parser
 
 # 词法分析器
 class CalcLexer(Lexer):
-    tokens = { NAME, NUMBER, ASSIGN }
+    tokens = { NAME, NUMBER, ASSIGN, ARROW }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>' }
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     ASSIGN = ':='
+    ARROW = '=>'
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -28,10 +29,10 @@ class CalcParser(Parser):
 
     precedence = (
         ('right', '?', ':'),           # Ternary operator (lowest precedence)
-        ('left', '>', '<', '='),     # Comparison operators
-        ('left', '+', '-'),           # Addition and subtraction
-        ('left', '*', '/'),           # Multiplication and division
-        ('right', 'UMINUS'),          # Unary minus
+        ('left', '>', '<', '='),       # Comparison operators
+        ('left', '+', '-'),            # Addition and subtraction
+        ('left', '*', '/'),            # Multiplication and division
+        ('right', 'UMINUS'),           # Unary minus
     )
 
     def __init__(self):
@@ -99,6 +100,16 @@ class CalcParser(Parser):
     def expr(self, p):
         return ('name', p.NAME)
 
+    # 函数定义
+    @_('NAME ARROW expr')
+    def expr(self, p):
+        return ('function_def', p.NAME, p.expr)
+
+    # 函数调用
+    @_('expr expr')
+    def expr(self, p):
+        return ('function_call', p.expr0, p.expr1)
+
 # 虚拟机
 class VirtualMachine:
     def __init__(self):
@@ -111,6 +122,9 @@ class VirtualMachine:
         return self.variables.get(name, default)
 
     def eval(self, node):
+        if node is None:
+            return None
+
         if node[0] == 'num':
             return node[1]
         elif node[0] == 'name':
@@ -139,6 +153,15 @@ class VirtualMachine:
         elif node[0] == 'ternary':
             cond = self.eval(node[1])
             return self.eval(node[2]) if cond else self.eval(node[3])
+        elif node[0] == 'function_def':
+            return node
+        elif node[0] == 'function_call':
+            # Call the function with the argument
+            func_name = self.eval(node[1])
+            arg_value = self.eval(node[2])
+            # Create a temporary environment for the function call
+            self.set(func_name[1], arg_value)
+            return self.eval(func_name[2])
 
 if __name__ == '__main__':
     lexer = CalcLexer()
@@ -153,4 +176,5 @@ if __name__ == '__main__':
         if text:
             ast = parser.parse(lexer.tokenize(text))
             print(ast)
-            print(vm.eval(ast))
+            result = vm.eval(ast)
+            print(result)
