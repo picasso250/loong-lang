@@ -1,75 +1,93 @@
+# -----------------------------------------------------------------------------
+# calc.py
+# -----------------------------------------------------------------------------
+
 from sly import Lexer, Parser
 
-# 定义词法分析器
 class CalcLexer(Lexer):
-    tokens = { NUMBER, PLUS, MINUS, TIMES, DIVIDE, LPAREN, RPAREN }
+    tokens = { NAME, NUMBER }
     ignore = ' \t'
+    literals = { '=', '+', '-', '*', '/', '(', ')' }
 
-    # Token正则表达式规则
-    NUMBER = r'\d+'
-    PLUS = r'\+'
-    MINUS = r'-'
-    TIMES = r'\*'
-    DIVIDE = r'/'
-    LPAREN = r'\('
-    RPAREN = r'\)'
+    # Tokens
+    NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
 
-    # 行号跟踪
-    def ignore_newline(self, t):
+    @_(r'\d+')
+    def NUMBER(self, t):
+        t.value = int(t.value)
+        return t
+
+    @_(r'\n+')
+    def newline(self, t):
         self.lineno += t.value.count('\n')
 
+    def error(self, t):
+        print("Illegal character '%s'" % t.value[0])
+        self.index += 1
 
-# 定义语法解析器
 class CalcParser(Parser):
     tokens = CalcLexer.tokens
 
-    # 定义优先级 (越下面优先级越高)
     precedence = (
-        ('left', PLUS, MINUS),
-        ('left', TIMES, DIVIDE),
-        ('nonassoc', 'UMINUS'),  # 一元负号优先级
-    )
+        ('left', '+', '-'),
+        ('left', '*', '/'),
+        ('right', 'UMINUS'),
+        )
 
-    # 定义语法规则
-    @_('expr PLUS expr')
+    def __init__(self):
+        self.names = { }
+
+    @_('NAME "=" expr')
+    def statement(self, p):
+        self.names[p.NAME] = p.expr
+
+    @_('expr')
+    def statement(self, p):
+        print(p.expr)
+
+    @_('expr "+" expr')
     def expr(self, p):
         return p.expr0 + p.expr1
 
-    @_('expr MINUS expr')
+    @_('expr "-" expr')
     def expr(self, p):
         return p.expr0 - p.expr1
 
-    @_('expr TIMES expr')
+    @_('expr "*" expr')
     def expr(self, p):
         return p.expr0 * p.expr1
 
-    @_('expr DIVIDE expr')
+    @_('expr "/" expr')
     def expr(self, p):
         return p.expr0 / p.expr1
 
-    @_('MINUS expr %prec UMINUS')
+    @_('"-" expr %prec UMINUS')
     def expr(self, p):
         return -p.expr
 
-    @_('LPAREN expr RPAREN')
+    @_('"(" expr ")"')
     def expr(self, p):
         return p.expr
 
     @_('NUMBER')
     def expr(self, p):
-        return int(p.NUMBER)
+        return p.NUMBER
 
+    @_('NAME')
+    def expr(self, p):
+        try:
+            return self.names[p.NAME]
+        except LookupError:
+            print("Undefined name '%s'" % p.NAME)
+            return 0
 
 if __name__ == '__main__':
     lexer = CalcLexer()
     parser = CalcParser()
-
     while True:
         try:
             text = input('calc > ')
-            if text.lower() in {'quit', 'exit'}:
-                break
-            result = parser.parse(lexer.tokenize(text))
-            print(result)
-        except Exception as e:
-            print(f"Error: {e}")
+        except EOFError:
+            break
+        if text:
+            parser.parse(lexer.tokenize(text))
