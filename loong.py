@@ -1,6 +1,6 @@
 
-
 from loongpaser import LoongLexer , LoongParser
+
 # 虚拟机
 class VirtualMachine:
     def __init__(self):
@@ -47,12 +47,25 @@ class VirtualMachine:
         elif node[0] == 'func_def':
             return node
         elif node[0] == 'func_call':
-            # Call the function with the argument
-            func_name = self.eval(node[1])
-            arg_value = self.eval(node[2])
-            # Create a temporary environment for the function call
-            self.set(func_name[1], arg_value)
-            return self.eval(func_name[2])
+            # Call the function with the arguments
+            func_def = self.eval(node[1])  # Function name
+            arg_values = [self.eval(arg) for arg in node[2]]  # Evaluate all arguments
+            
+            if func_def:
+                _, params, body = func_def
+                # Create a temporary environment for the function call
+                local_env = {params[i]: arg_values[i] for i in range(len(params))}
+                
+                # Save the current environment to restore after function execution
+                saved_env = self.variables
+                self.variables = local_env
+                
+                result = self.eval(body)
+                
+                # Restore the previous environment
+                self.variables = saved_env
+                
+                return result
 
 if __name__ == '__main__':
     lexer = LoongLexer()

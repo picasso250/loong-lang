@@ -12,20 +12,21 @@
 # 2. 算术表达式：a + b * 2
 # 3. 条件运算符：a > 10 ? "Yes" : "No"
 # 4. 函数定义与调用：
-#    函数定义：f := x => x + 2
-#    函数调用：f 5  # 返回 7
+#    函数定义：(a,b) => a+b
+#    函数调用：f(a,b)
 
 from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, ASSIGN, ARROW }
+    tokens = { NAME, NUMBER, ASSIGN, ARROW, COMMA }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ',' }
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     ASSIGN = ':='
     ARROW = '=>'
+    COMMA = r','  # 支持逗号
 
     @_(r'\d+')
     def NUMBER(self, t):
@@ -118,11 +119,38 @@ class LoongParser(Parser):
         return ('name', p.NAME)
 
     # 函数定义
-    @_('NAME ARROW expr')
+    @_(' "("  ")" ARROW expr')
     def expr(self, p):
-        return ('func_def', p.NAME, p.expr)
+        return ('func_def', [], p.expr)
+    @_(' "(" NAME ")" ARROW expr')
+    def expr(self, p):
+        return ('func_def', [p.NAME], p.expr)
+    @_(' "(" param_list ")" ARROW expr')
+    def expr(self, p):
+        return ('func_def', p.param_list, p.expr)
 
     # 函数调用
-    @_('expr expr')
+    @_('expr "("  ")"')
     def expr(self, p):
-        return ('func_call', p.expr0, p.expr1)
+        return ('func_call', p.expr, [])
+    @_('expr "(" arg_list ")"')
+    def expr(self, p):
+        return ('func_call', p.expr, p.arg_list)
+
+    # 参数列表
+    @_('NAME')
+    def param_list(self, p):
+        return [p.NAME]
+
+    @_('param_list COMMA NAME')
+    def param_list(self, p):
+        return p.param_list + [p.NAME]
+
+    # 参数列表
+    @_('expr')
+    def arg_list(self, p):
+        return [p.expr]
+
+    @_('arg_list COMMA expr')
+    def arg_list(self, p):
+        return p.arg_list + [p.expr]
