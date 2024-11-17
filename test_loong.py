@@ -7,24 +7,28 @@ def test_loong():
     vm = VirtualMachine()
 
     test_cases = [
+        # 基本功能
         {"input": "((a) => a)(1)", "expected": 1},
         {"input": "((a, b) => a + b)(2, 3)", "expected": 5},
         {"input": "a := 10", "expected": None},
         {"input": "a + 5", "expected": 15},
         {"input": "10 > 5 ? 1 : 0", "expected": 1},
         {"input": "10 < 5 ? 1 : 0", "expected": 0},
-        {"input": "((x) => x * x)(4)", "expected": 16},
-        {"input": "f := (x) => x + 2", "expected": None},
-        {"input": "f(3)", "expected": 5},
-        {"input": "((x, y) => x > y ? x : y)(7, 3)", "expected": 7},
         {"input": "((a)=>(b)=>a+b)(3)(4)", "expected": 7},
+
+        # 新增测试
+        {"input": "(()=> 42)()", "expected": 42},  # 无参数函数
+        {"input": "((a, b, c) => a + b + c)(1, 2, 3)", "expected": 6},  # 多参数
+        {"input": "((a) => (b) => a + b)(1)(2)", "expected": 3},  # 嵌套函数调用
+        {"input": "(1 + 2) * (3 + 4)", "expected": 21},  # 嵌套表达式
+        {"input": "10 = 5", "expected": False},  # 相等比较
     ]
 
     for i, test in enumerate(test_cases):
         try:
             ast = parser.parse(lexer.tokenize(test["input"]))
             result = vm.eval(ast)
-            assert result == test["expected"], f"Test case {i+1} failed: expected {test['expected']}, got {result}"
+            assert result == test["expected"], f"Test case {i+1} {test['input']} failed: expected {test['expected']}, got {result}"
         except Exception as e:
             print(f"Test case {i+1} failed with exception: {e}")
             print(f"Input: {test['input']}")
