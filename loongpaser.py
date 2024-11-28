@@ -2,13 +2,15 @@ from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, ARROW, COMMA }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, COMMA, FUNC, END }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ';', ',' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', ':' }
+
+    FUNC = r'func'
+    END = r'end'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
-    ARROW = '=>'
     ASSIGN = '='
     COMMA = r','  # 支持逗号
 
@@ -36,6 +38,7 @@ class LoongLexer(Lexer):
     def error(self, t):
         print("Illegal character '%s'" % t.value[0])
         self.index += 1
+
 
 # 语法分析器
 class LoongParser(Parser):
@@ -66,6 +69,12 @@ class LoongParser(Parser):
     def statement(self, p):
         return ('assign', p.NAME, p.expr)
 
+    # 函数定义语句
+    @_('FUNC NAME "(" param_list ")" expr END')
+    def statement(self, p):
+        return ('func_def', p.NAME, p.param_list, p.expr)
+
+    # 变量赋值
     @_('expr')
     def statement(self, p):
         return p.expr
@@ -128,16 +137,10 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('name', p.NAME)
 
-    # 函数定义
-    @_(' "("  ")" ARROW expr')
+    # 函数调用
+    @_('NAME "(" arg_list ")"')
     def expr(self, p):
-        return ('func_def', [], p.expr)
-    @_(' "(" NAME ")" ARROW expr')  # 不知道为何需要这个，但确实需要这个
-    def expr(self, p):
-        return ('func_def', [p.NAME], p.expr)
-    @_(' "(" param_list ")" ARROW expr')
-    def expr(self, p):
-        return ('func_def', p.param_list, p.expr)
+        return ('func_call', p.NAME, p.arg_list)
 
     # 参数列表
     @_('NAME')
@@ -147,14 +150,6 @@ class LoongParser(Parser):
     @_('param_list COMMA NAME')
     def param_list(self, p):
         return p.param_list + [p.NAME]
-
-    # 函数调用
-    @_('expr "("  ")"')
-    def expr(self, p):
-        return ('func_call', p.expr, [])
-    @_('expr "(" arg_list ")"')
-    def expr(self, p):
-        return ('func_call', p.expr, p.arg_list)
 
     # 参数列表
     @_('expr')
@@ -171,10 +166,15 @@ class LoongParser(Parser):
         else:
             print("Syntax error at EOF")
 
+
 if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = '# This is a comment\n"Hello, " + "world!"'
+    text = '''# This is a comment
+func foo(a, b) a + b end ;
+func foo(a) a end
+'''
     ast = parser.parse(lexer.tokenize(text))
-    print(ast)
+    import json
+    print(json.dumps(ast, indent=2))
