@@ -43,6 +43,7 @@ def test_loong():
 
     for i, test in enumerate(test_cases):
         try:
+            print(test["input"])
             ast = parser.parse(lexer.tokenize(test["input"]))
             result = vm.eval(ast)
             assert result == test["expected"], f"Test case {i+1} {test['input']} failed: expected {test['expected']}, got {result}"

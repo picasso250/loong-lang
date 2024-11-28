@@ -84,23 +84,18 @@ class LoongParser(Parser):
     @_('expr')
     def statement(self, p):
         return p.expr
-
-    # 运算符
-    @_('expr "+" expr')
+# 运算符
+    @_('expr "+" expr',
+       'expr "-" expr',
+       'expr "*" expr',
+       'expr "/" expr',
+       'expr ">" expr',
+       'expr "<" expr',
+       'expr EQUALS expr',
+       'expr GE expr',
+       'expr LE expr')
     def expr(self, p):
-        return ('binop', '+', p.expr0, p.expr1)
-
-    @_('expr "-" expr')
-    def expr(self, p):
-        return ('binop', '-', p.expr0, p.expr1)
-
-    @_('expr "*" expr')
-    def expr(self, p):
-        return ('binop', '*', p.expr0, p.expr1)
-
-    @_('expr "/" expr')
-    def expr(self, p):
-        return ('binop', '/', p.expr0, p.expr1)
+        return ('binop', p[1], p.expr0, p.expr1)
 
     @_('"-" expr %prec UMINUS')
     def expr(self, p):
@@ -109,27 +104,6 @@ class LoongParser(Parser):
     @_('"(" expr ")"')
     def expr(self, p):
         return p.expr
-
-    # 比较运算符
-    @_('expr ">" expr')
-    def expr(self, p):
-        return ('binop', '>', p.expr0, p.expr1)
-
-    @_('expr "<" expr')
-    def expr(self, p):
-        return ('binop', '<', p.expr0, p.expr1)
-
-    @_('expr EQUALS expr')
-    def expr(self, p):
-        return ('binop', '==', p.expr0, p.expr1)
-
-    @_('expr GE expr')
-    def expr(self, p):
-        return ('binop', '>=', p.expr0, p.expr1)
-
-    @_('expr LE expr')
-    def expr(self, p):
-        return ('binop', '<=', p.expr0, p.expr1)
 
     # 三元运算符
     @_('expr "?" expr ":" expr')
