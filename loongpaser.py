@@ -2,7 +2,7 @@ from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, COMMA, FUNC, END }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',' }
 
@@ -12,6 +12,8 @@ class LoongLexer(Lexer):
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
     ASSIGN = '='
+    GE = '>='
+    LE = '<='
     COMMA = r','  # 支持逗号
 
     @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')
@@ -46,7 +48,7 @@ class LoongParser(Parser):
 
     precedence = (
         ('right', '?', ':'),           # Ternary operator (lowest precedence)
-        ('left', '>', '<', 'EQUALS'),  # Comparison operators
+        ('left', '>', '<', 'EQUALS', 'GE', 'LE'),  # Comparison operators
         ('left', '+', '-'),            # Addition and subtraction
         ('left', '*', '/'),            # Multiplication and division
         ('right', 'UMINUS'),           # Unary minus
@@ -121,6 +123,14 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('binop', '==', p.expr0, p.expr1)
 
+    @_('expr GE expr')
+    def expr(self, p):
+        return ('binop', '>=', p.expr0, p.expr1)
+
+    @_('expr LE expr')
+    def expr(self, p):
+        return ('binop', '<=', p.expr0, p.expr1)
+
     # 三元运算符
     @_('expr "?" expr ":" expr')
     def expr(self, p):
@@ -178,10 +188,10 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# This is a comment
-func foo(a, b): a + b end ;
-func foo(a): a end
+func foo(a, b): a >= b end 
+func bar(c, d): c <= d end
 '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
     from pretty_dump_json import pretty_dump_json
-    print(pretty_dump_json(ast,indent=2,max_length=44))
+    print(pretty_dump_json(ast, indent=2, max_length=44))
