@@ -176,5 +176,5 @@ func foo(a, b) a + b end ;
 func foo(a) a end
 '''
     ast = parser.parse(lexer.tokenize(text))
-    import json
-    print(json.dumps(ast, indent=2))
+    from pretty_dump_json import pretty_dump_json
+    print(pretty_dump_json(ast,indent=2,max_length=33))
