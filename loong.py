@@ -29,7 +29,7 @@ class VirtualMachine:
         if node is None:
             return None
 
-        if node[0] == 'num':
+        if node[0] == 'num' or node[0] == 'str':
             return node[1]
         elif node[0] == 'name':
             return env.lookup(node[1], 0)

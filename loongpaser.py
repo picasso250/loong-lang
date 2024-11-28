@@ -127,7 +127,7 @@ class LoongParser(Parser):
     # 字符串
     @_('STRING')
     def expr(self, p):
-        return ('string', p.STRING)
+        return ('str', p.STRING)
 
     # 变量名
     @_('NAME')
@@ -175,6 +175,6 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = ' x := 3.14; y := "Hello, world!"; z := 2.71'
+    text = '"Hello, " + "world!"'
     ast = parser.parse(lexer.tokenize(text))
     print(ast)
