@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 class LoongLexer(Lexer):
     tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, COMMA, FUNC, END }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', ':' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',' }
 
     FUNC = r'func'
     END = r'end'
@@ -70,7 +70,7 @@ class LoongParser(Parser):
         return ('assign', p.NAME, p.expr)
 
     # 函数定义语句
-    @_('FUNC NAME "(" param_list ")" expr END')
+    @_('FUNC NAME "(" param_list ")" ":" expr END')
     def statement(self, p):
         return ('func_def', p.NAME, p.param_list, p.expr)
 
@@ -140,8 +140,10 @@ class LoongParser(Parser):
     # 函数调用
     @_('NAME "(" arg_list ")"')
     def expr(self, p):
-        return ('func_call', p.NAME, p.arg_list)
-
+        return ('func_call', ('name', p.NAME), p.arg_list)
+    @_('"(" expr ")" "(" arg_list ")"')
+    def expr(self, p):
+        return ('func_call', p.expr, p.arg_list)
     # 参数列表
     @_('NAME')
     def param_list(self, p):
@@ -172,9 +174,10 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# This is a comment
-func foo(a, b) a + b end ;
-func foo(a) a end
+func foo(a, b): a + b end ;
+func foo(a): a end
 '''
-    ast = parser.parse(lexer.tokenize(text))
+    toks = lexer.tokenize(text)
+    ast = parser.parse(toks)
     from pretty_dump_json import pretty_dump_json
-    print(pretty_dump_json(ast,indent=2,max_length=33))
+    print(pretty_dump_json(ast,indent=2,max_length=44))

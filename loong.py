@@ -1,5 +1,6 @@
 import sys
 from loongpaser import LoongLexer, LoongParser
+from pretty_dump_json import pretty_dump_json
 
 # 环境类
 class Env:
@@ -59,7 +60,8 @@ class VirtualMachine:
             cond = self.eval(node[1], env)
             return self.eval(node[2], env) if cond else self.eval(node[3], env)
         elif node[0] == 'func_def':
-            return node + (env,)  # 将环境绑定到函数定义中
+            _, name, params, body = node  # Function name, parameters, body
+            env.set(name, ('func', params, body, env))
         elif node[0] == 'func_call':
             # Function call processing:
             func_def = self.eval(node[1], env)  # This retrieves the function definition
@@ -81,8 +83,6 @@ class VirtualMachine:
                 result = self.eval(statement, env)
             return result
 
-import json
-
 if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
@@ -93,9 +93,10 @@ if __name__ == '__main__':
         filename = sys.argv[1]
         with open(filename, 'r', encoding='utf-8') as file:
             code = file.read()
-        ast = parser.parse(lexer.tokenize(code))
+        toks = lexer.tokenize(code)
+        ast = parser.parse(toks)
         # 将 ast 转换为 JSON 并打印
-        print(json.dumps(ast, indent=4))
+        print(pretty_dump_json(ast,indent=2,max_length=44))
         result = vm.eval(ast)
         print(result)
     else:
@@ -108,6 +109,6 @@ if __name__ == '__main__':
             if text:
                 ast = parser.parse(lexer.tokenize(text))
                 # 将 ast 转换为 JSON 并打印
-                print(json.dumps(ast, indent=4))
+                print(pretty_dump_json(ast,indent=2,max_length=44))
                 result = vm.eval(ast)
                 print(result)
