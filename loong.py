@@ -72,8 +72,13 @@ class VirtualMachine:
                     local_env.set(params[i], arg_values[i])  # Bind arguments to parameters
                 
                 # Evaluate the function body in this new local environment
-                result = self.eval(body, local_env)  
+                result = self.eval(body, local_env)
                 return result
+        elif node[0] == 'statements':
+            result = None
+            for statement in node[1]:
+                result = self.eval(statement, env)
+            return result
 
 if __name__ == '__main__':
     lexer = LoongLexer()

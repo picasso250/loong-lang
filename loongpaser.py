@@ -21,7 +21,7 @@ from sly import Lexer, Parser
 class LoongLexer(Lexer):
     tokens = { NAME, NUMBER, ASSIGN, ARROW, COMMA }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ',' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ';', ',' }
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     ASSIGN = ':='
@@ -55,6 +55,15 @@ class LoongParser(Parser):
 
     def __init__(self):
         self.names = {}
+
+    # 语句组
+    @_('statement ";" statements')
+    def statements(self, p):
+        return ('statements', [p.statement] + p.statements[1])
+
+    @_('statement')
+    def statements(self, p):
+        return ('statements', [p.statement])
 
     # 语句
     @_('NAME ASSIGN expr')
@@ -154,3 +163,4 @@ class LoongParser(Parser):
     @_('arg_list COMMA expr')
     def arg_list(self, p):
         return p.arg_list + [p.expr]
+
