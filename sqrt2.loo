@@ -1,15 +1,15 @@
 # 定义一个递归函数来实现牛顿法
-sqrt_newton := (x, guess) => (
+func sqrt_newton(x, guess):
     abs(guess * guess - x) < 1e-10 ? 
         guess : 
         sqrt_newton(x, 0.5 * (guess + x / guess))
-);
+end
 
 # 定义一个求绝对值的辅助函数
-abs := (x) => x < 0 ? -x : x;
+func abs(x):
+    x < 0 ? -x : x
+end
 
 # 初始化计算 sqrt(2) 的初始猜测值，并调用 sqrt_newton 函数
-initial_guess := 1.0;
-result := sqrt_newton(2, initial_guess);
-
-result
+initial_guess = 1.0;
+sqrt_newton(2, initial_guess)
