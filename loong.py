@@ -52,6 +52,10 @@ class VirtualMachine:
                 return left < right
             elif node[1] == '==':
                 return left == right
+            elif node[1] == '>=':
+                return left >= right
+            elif node[1] == '<=':
+                return left <= right
         elif node[0] == 'unaryop':
             return -self.eval(node[2], env)
         elif node[0] == 'assign':
