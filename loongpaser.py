@@ -2,12 +2,16 @@ from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', '[', ']' }
 
     FUNC = r'func'
     END = r'end'
+    AND = r'and'
+    OR = r'or'
+    XOR = r'xor'
+    NOT = r'not'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
@@ -48,6 +52,10 @@ class LoongParser(Parser):
 
     precedence = (
         ('right', '?', ':'),           # Ternary operator (lowest precedence)
+        ('left', 'OR'),               # Logical OR
+        ('left', 'XOR'),              # Logical XOR
+        ('left', 'AND'),              # Logical AND
+        ('right', 'NOT'),             # Logical NOT
         ('left', '>', '<', 'EQUALS', 'GE', 'LE'),  # Comparison operators
         ('left', '+', '-'),            # Addition and subtraction
         ('left', '*', '/'),            # Multiplication and division
@@ -104,6 +112,16 @@ class LoongParser(Parser):
        'expr LE expr')
     def expr(self, p):
         return ('binop', p[1], p.expr0, p.expr1)
+
+    @_('expr AND expr',
+       'expr OR expr',
+       'expr XOR expr')
+    def expr(self, p):
+        return ('logicop', p[1], p.expr0, p.expr1)
+
+    @_('NOT expr')
+    def expr(self, p):
+        return ('unaryop', 'not', p.expr)
 
     @_('"-" expr %prec UMINUS')
     def expr(self, p):
@@ -171,10 +189,10 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = '''# 测试数组语法
-        [1, 2, 3];
-        ["a", "b", "c"];
-        []'''
+    text = '''# 测试逻辑运算符
+        a = 1 and 0 or 1 xor 0;
+        b = not (1 and 0)
+    '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
     from pretty_dump_json import pretty_dump_json

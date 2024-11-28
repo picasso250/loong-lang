@@ -58,8 +58,19 @@ class VirtualMachine:
                 return left >= right
             elif node[1] == '<=':
                 return left <= right
+        elif node[0] == 'logicop':
+            left = self.eval(node[2], env)
+            if node[1] == 'and':
+                return left and self.eval(node[3], env)
+            elif node[1] == 'or':
+                return left or self.eval(node[3], env)
+            elif node[1] == 'xor':
+                return bool(left) ^ bool(self.eval(node[3], env))
         elif node[0] == 'unaryop':
-            return -self.eval(node[2], env)
+            if node[1] == 'not':
+                return not self.eval(node[2], env)
+            elif node[1] == '-':
+                return -self.eval(node[2], env)
         elif node[0] == 'assign':
             env.set(node[1], self.eval(node[2], env))
         elif node[0] == 'ternary':
