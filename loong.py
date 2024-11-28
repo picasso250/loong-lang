@@ -1,3 +1,4 @@
+import sys
 from loongpaser import LoongLexer, LoongParser
 
 # 环境类
@@ -85,13 +86,23 @@ if __name__ == '__main__':
     parser = LoongParser()
     vm = VirtualMachine()
 
-    while True:
-        try:
-            text = input('loong > ')
-        except EOFError:
-            break
-        if text:
-            ast = parser.parse(lexer.tokenize(text))
-            print(ast)
-            result = vm.eval(ast)
-            print(result)
+    if len(sys.argv) > 1:
+        # 从文件中读取代码
+        filename = sys.argv[1]
+        with open(filename, 'r', encoding='utf-8') as file:
+            code = file.read()
+        ast = parser.parse(lexer.tokenize(code))
+        result = vm.eval(ast)
+        print(result)
+    else:
+        # 从标准输入读取代码
+        while True:
+            try:
+                text = input('loong > ')
+            except EOFError:
+                break
+            if text:
+                ast = parser.parse(lexer.tokenize(text))
+                print(ast)
+                result = vm.eval(ast)
+                print(result)

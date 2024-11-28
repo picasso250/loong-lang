@@ -8,6 +8,7 @@
 # - 支持字符串（双引号括起来）
 # - 支持小数
 # - 支持函数定义和调用
+# - 支持单行注释（以井号 # 开头）
 
 from sly import Lexer, Parser
 
@@ -34,6 +35,10 @@ class LoongLexer(Lexer):
     def STRING(self, t):
         t.value = t.value[1:-1]  # 去掉双引号
         return t
+
+    @_(r'#.*')
+    def COMMENT(self, t):
+        pass  # 忽略注释内容
 
     @_(r'\n+')
     def newline(self, t):
@@ -175,6 +180,6 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = '"Hello, " + "world!"'
+    text = '# This is a comment\n"Hello, " + "world!"'
     ast = parser.parse(lexer.tokenize(text))
     print(ast)
