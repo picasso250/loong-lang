@@ -138,14 +138,6 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('func_def', p.param_list, p.expr)
 
-    # 函数调用
-    @_('expr "("  ")"')
-    def expr(self, p):
-        return ('func_call', p.expr, [])
-    @_('expr "(" arg_list ")"')
-    def expr(self, p):
-        return ('func_call', p.expr, p.arg_list)
-
     # 参数列表
     @_('NAME')
     def param_list(self, p):
@@ -154,6 +146,14 @@ class LoongParser(Parser):
     @_('param_list COMMA NAME')
     def param_list(self, p):
         return p.param_list + [p.NAME]
+
+    # 函数调用
+    @_('expr "("  ")"')
+    def expr(self, p):
+        return ('func_call', p.expr, [])
+    @_('expr "(" arg_list ")"')
+    def expr(self, p):
+        return ('func_call', p.expr, p.arg_list)
 
     # 参数列表
     @_('expr')
@@ -164,3 +164,10 @@ class LoongParser(Parser):
     def arg_list(self, p):
         return p.arg_list + [p.expr]
 
+if __name__ == '__main__':
+    lexer = LoongLexer()
+    parser = LoongParser()
+
+    text = "(a)=>a;(a,b)=>a+b"
+    ast = parser.parse(lexer.tokenize(text))
+    print(ast)
