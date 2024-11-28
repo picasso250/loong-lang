@@ -41,7 +41,19 @@ def test_loong():
         {"input": "func square(x): x * x end", "expected": None},
         {"input": "square(6)", "expected": 36},  # 测试单参数函数
         {"input": "func identity(x): x end", "expected": None},
-        {"input": "identity(42)", "expected": 412},  # 测试返回参数的函数
+        {"input": "identity(42)", "expected": 42},  # 测试返回参数的函数
+
+        # 数组测试
+        {"input": "arr = [1, 2, 3]", "expected": None},  # 数组赋值
+        {"input": "arr[0]", "expected": 1},  # 获取第一个元素
+        {"input": "arr[1]", "expected": 2},  # 获取第二个元素
+        {"input": "arr[2]", "expected": 3},  # 获取第三个元素
+        {"input": "arr[0] + arr[1]", "expected": 3},  # 数组元素求和
+        {"input": "arr[1] * arr[2]", "expected": 6},  # 数组元素相乘
+        {"input": "arr = [10, 20, 30]", "expected": None},  # 重新赋值数组
+        {"input": "arr[0] + arr[2]", "expected": 40},  # 新数组的元素求和
+        {"input": "b = [1, 2] + [3, 4]", "expected": None},  # 数组拼接
+        {"input": "b[3]", "expected": 4},  # 获取拼接后的元素
     ]
 
     for i, test in enumerate(test_cases):

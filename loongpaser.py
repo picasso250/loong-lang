@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 class LoongLexer(Lexer):
     tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', '[', ']' }
 
     FUNC = r'func'
     END = r'end'
@@ -14,7 +14,7 @@ class LoongLexer(Lexer):
     ASSIGN = '='
     GE = '>='
     LE = '<='
-    COMMA = r','  # 支持逗号
+    COMMA = r','
 
     @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')
     def NUMBER(self, t):
@@ -84,7 +84,15 @@ class LoongParser(Parser):
     @_('expr')
     def statement(self, p):
         return p.expr
-# 运算符
+    # 数组语法
+    @_('"[" "]"')
+    def expr(self, p):
+        return ('array', [])
+
+    @_('"[" arg_list "]"')
+    def expr(self, p):
+        return ('array', p.arg_list)
+    # 运算符
     @_('expr "+" expr',
        'expr "-" expr',
        'expr "*" expr',
@@ -129,9 +137,11 @@ class LoongParser(Parser):
     @_('NAME "(" arg_list ")"')
     def expr(self, p):
         return ('func_call', ('name', p.NAME), p.arg_list)
+
     @_('"(" expr ")" "(" arg_list ")"')
     def expr(self, p):
         return ('func_call', p.expr, p.arg_list)
+
     # 参数列表
     @_('NAME')
     def param_list(self, p):
@@ -161,10 +171,10 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = '''# This is a comment
-func foo(a, b): a >= b end 
-func bar(c, d): c <= d end
-'''
+    text = '''# 测试数组语法
+        [1, 2, 3];
+        ["a", "b", "c"];
+        []'''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
     from pretty_dump_json import pretty_dump_json
