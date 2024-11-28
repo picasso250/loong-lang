@@ -1,10 +1,12 @@
 # 解释器 - Loong
-# 该程序实现了一个简单的解释器，能够解析和执行基本的数学表达式、变量赋值、三元运算符、函数定义与调用等功能。
+# 该程序实现了一个简单的解释器，能够解析和执行基本的数学表达式、变量赋值、三元运算符、字符串、小数、函数定义与调用等功能。
 # 使用 sly 库进行词法分析与语法分析，支持以下功能：
 # - 基本的算术运算：加法、减法、乘法、除法
 # - 比较运算符：大于、小于、等于
 # - 变量赋值与引用
 # - 支持三元运算符
+# - 支持字符串（双引号括起来）
+# - 支持小数
 # - 支持函数定义和调用
 
 from sly import Lexer, Parser
@@ -20,9 +22,12 @@ class LoongLexer(Lexer):
     ARROW = '=>'
     COMMA = r','  # 支持逗号
 
-    @_(r'\d+')
+    @_(r'\d+\.\d+|\d+')
     def NUMBER(self, t):
-        t.value = int(t.value)
+        if '.' in t.value:
+            t.value = float(t.value)
+        else:
+            t.value = int(t.value)
         return t
 
     @_(r'"[^"\n]*"')
@@ -170,6 +175,6 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = '(a) => a; (a, b) => a + b; x := "Hello, world!"'
+    text = ' x := 3.14; y := "Hello, world!"; z := 2.71'
     ast = parser.parse(lexer.tokenize(text))
     print(ast)
