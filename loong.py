@@ -1,6 +1,8 @@
 import sys
 from loongpaser import LoongLexer, LoongParser
 from pretty_dump_json import pretty_dump_json
+from colorama import init, Fore, Style
+from termcolor import colored
 
 # 环境类
 class Env:
@@ -88,9 +90,12 @@ class VirtualMachine:
             return result
 
 if __name__ == '__main__':
+    init()  # 初始化 colorama
     lexer = LoongLexer()
     parser = LoongParser()
     vm = VirtualMachine()
+
+    debug_mode = '-d' in sys.argv
 
     if len(sys.argv) > 1:
         # 从文件中读取代码
@@ -99,8 +104,9 @@ if __name__ == '__main__':
             code = file.read()
         toks = lexer.tokenize(code)
         ast = parser.parse(toks)
-        # 将 ast 转换为 JSON 并打印
-        print(pretty_dump_json(ast,indent=2,max_length=44))
+        if debug_mode:
+            # 将 ast 转换为 JSON 并打印
+            print(colored(pretty_dump_json(ast, indent=2, max_length=44), 'grey'))
         result = vm.eval(ast)
         print(result)
     else:
@@ -112,7 +118,8 @@ if __name__ == '__main__':
                 break
             if text:
                 ast = parser.parse(lexer.tokenize(text))
-                # 将 ast 转换为 JSON 并打印
-                print(pretty_dump_json(ast,indent=2,max_length=44))
+                if debug_mode:
+                    # 将 ast 转换为 JSON 并打印
+                    print(colored(pretty_dump_json(ast, indent=2, max_length=44), 'grey'))
                 result = vm.eval(ast)
                 print(result)

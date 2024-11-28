@@ -102,7 +102,7 @@ result = sum(a, b)
 
 1. 安装依赖项：
     ```bash
-    pip install sly
+    pip install sly colorama termcolor
     ```
 
 2. 运行解释器：
