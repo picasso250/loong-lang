@@ -81,6 +81,8 @@ class VirtualMachine:
                 result = self.eval(statement, env)
             return result
 
+import json
+
 if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
@@ -92,6 +94,8 @@ if __name__ == '__main__':
         with open(filename, 'r', encoding='utf-8') as file:
             code = file.read()
         ast = parser.parse(lexer.tokenize(code))
+        # 将 ast 转换为 JSON 并打印
+        print(json.dumps(ast, indent=4))
         result = vm.eval(ast)
         print(result)
     else:
@@ -103,6 +107,7 @@ if __name__ == '__main__':
                 break
             if text:
                 ast = parser.parse(lexer.tokenize(text))
-                print(ast)
+                # 将 ast 转换为 JSON 并打印
+                print(json.dumps(ast, indent=4))
                 result = vm.eval(ast)
                 print(result)

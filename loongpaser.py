@@ -23,9 +23,9 @@ class LoongLexer(Lexer):
     ARROW = '=>'
     COMMA = r','  # 支持逗号
 
-    @_(r'\d+\.\d+|\d+')
+    @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')
     def NUMBER(self, t):
-        if '.' in t.value:
+        if '.' in t.value or 'e' in t.value or 'E' in t.value:
             t.value = float(t.value)
         else:
             t.value = int(t.value)
@@ -175,6 +175,12 @@ class LoongParser(Parser):
     @_('arg_list COMMA expr')
     def arg_list(self, p):
         return p.arg_list + [p.expr]
+
+    def error(self, p):
+        if p:
+            print(f"Syntax error at token {p.type}({p.value}) in line {p.lineno}")
+        else:
+            print("Syntax error at EOF")
 
 if __name__ == '__main__':
     lexer = LoongLexer()
