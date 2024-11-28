@@ -1,0 +1,7 @@
+# 定义阶乘函数
+factorial := (n) => 
+    n <= 1 ? 1 : n * factorial(n - 1)
+;
+
+# 调用阶乘函数并打印结果
+factorial(3)

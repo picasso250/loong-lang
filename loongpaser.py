@@ -1,26 +1,15 @@
-# 解释器 - Loong
-# 该程序实现了一个简单的解释器，能够解析和执行基本的数学表达式、变量赋值、三元运算符、字符串、小数、函数定义与调用等功能。
-# 使用 sly 库进行词法分析与语法分析，支持以下功能：
-# - 基本的算术运算：加法、减法、乘法、除法
-# - 比较运算符：大于、小于、等于
-# - 变量赋值与引用
-# - 支持三元运算符
-# - 支持字符串（双引号括起来）
-# - 支持小数
-# - 支持函数定义和调用
-# - 支持单行注释（以井号 # 开头）
-
 from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, ARROW, COMMA }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, ARROW, COMMA }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ';', ',' }
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
-    ASSIGN = ':='
+    EQUALS = '=='
     ARROW = '=>'
+    ASSIGN = '='
     COMMA = r','  # 支持逗号
 
     @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')
@@ -54,7 +43,7 @@ class LoongParser(Parser):
 
     precedence = (
         ('right', '?', ':'),           # Ternary operator (lowest precedence)
-        ('left', '>', '<', '='),       # Comparison operators
+        ('left', '>', '<', 'EQUALS'),  # Comparison operators
         ('left', '+', '-'),            # Addition and subtraction
         ('left', '*', '/'),            # Multiplication and division
         ('right', 'UMINUS'),           # Unary minus
@@ -115,9 +104,9 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('binop', '<', p.expr0, p.expr1)
 
-    @_('expr "=" expr')
+    @_('expr EQUALS expr')
     def expr(self, p):
-        return ('binop', '=', p.expr0, p.expr1)
+        return ('binop', '==', p.expr0, p.expr1)
 
     # 三元运算符
     @_('expr "?" expr ":" expr')
@@ -143,7 +132,7 @@ class LoongParser(Parser):
     @_(' "("  ")" ARROW expr')
     def expr(self, p):
         return ('func_def', [], p.expr)
-    @_(' "(" NAME ")" ARROW expr') # 不知道为何需要这个，但确实需要这个
+    @_(' "(" NAME ")" ARROW expr')  # 不知道为何需要这个，但确实需要这个
     def expr(self, p):
         return ('func_def', [p.NAME], p.expr)
     @_(' "(" param_list ")" ARROW expr')
