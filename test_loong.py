@@ -1,7 +1,10 @@
 from loongpaser import LoongLexer, LoongParser
 from loong import VirtualMachine
+from colorama import init, Fore, Style
+from termcolor import colored
 
 def test_loong():
+    init()  # 初始化 colorama
     lexer = LoongLexer()
     parser = LoongParser()
     vm = VirtualMachine()
@@ -38,21 +41,21 @@ def test_loong():
         {"input": "func square(x): x * x end", "expected": None},
         {"input": "square(6)", "expected": 36},  # 测试单参数函数
         {"input": "func identity(x): x end", "expected": None},
-        {"input": "identity(42)", "expected": 42},  # 测试返回参数的函数
+        {"input": "identity(42)", "expected": 412},  # 测试返回参数的函数
     ]
 
     for i, test in enumerate(test_cases):
         try:
-            print(test["input"])
+            print(colored(test["input"], 'grey'))
             ast = parser.parse(lexer.tokenize(test["input"]))
             result = vm.eval(ast)
             assert result == test["expected"], f"Test case {i+1} {test['input']} failed: expected {test['expected']}, got {result}"
         except Exception as e:
-            print(f"Test case {i+1} failed with exception: {e}")
-            print(f"Input: {test['input']}")
+            print(colored(f"Test case {i+1} failed with exception: {e}", 'red'))
+            print(colored(f"Input: {test['input']}", 'red'))
             exit(-1)
 
-    print("OK")
+    print(colored("OK", 'green'))
 
 if __name__ == "__main__":
     test_loong()
