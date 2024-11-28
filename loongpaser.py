@@ -59,11 +59,15 @@ class LoongParser(Parser):
     @_('statement ";" statements')
     def statements(self, p):
         return ('statements', [p.statement] + p.statements[1])
-
+    @_('statement_with_end statements')
+    def statements(self, p):
+        return ('statements', [p.statement_with_end] + p.statements[1])
     @_('statement')
     def statements(self, p):
         return ('statements', [p.statement])
-
+    @_('statement_with_end')
+    def statements(self, p):
+        return ('statements', [p.statement_with_end])
     # 语句
     @_('NAME ASSIGN expr')
     def statement(self, p):
@@ -71,7 +75,7 @@ class LoongParser(Parser):
 
     # 函数定义语句
     @_('FUNC NAME "(" param_list ")" ":" expr END')
-    def statement(self, p):
+    def statement_with_end(self, p):
         return ('func_def', p.NAME, p.param_list, p.expr)
 
     # 变量赋值
