@@ -7,19 +7,11 @@
 # - 支持三元运算符
 # - 支持函数定义和调用
 
-# 语法示例：
-# 1. 变量赋值：a := 10
-# 2. 算术表达式：a + b * 2
-# 3. 条件运算符：a > 10 ? "Yes" : "No"
-# 4. 函数定义与调用：
-#    函数定义：(a,b) => a+b
-#    函数调用：f(a,b)
-
 from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, ASSIGN, ARROW, COMMA }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, ARROW, COMMA }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ':=', '=>', ';', ',' }
 
@@ -31,6 +23,11 @@ class LoongLexer(Lexer):
     @_(r'\d+')
     def NUMBER(self, t):
         t.value = int(t.value)
+        return t
+
+    @_(r'"[^"\n]*"')
+    def STRING(self, t):
+        t.value = t.value[1:-1]  # 去掉双引号
         return t
 
     @_(r'\n+')
@@ -122,6 +119,11 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('num', p.NUMBER)
 
+    # 字符串
+    @_('STRING')
+    def expr(self, p):
+        return ('string', p.STRING)
+
     # 变量名
     @_('NAME')
     def expr(self, p):
@@ -168,6 +170,6 @@ if __name__ == '__main__':
     lexer = LoongLexer()
     parser = LoongParser()
 
-    text = "(a)=>a;(a,b)=>a+b"
+    text = '(a) => a; (a, b) => a + b; x := "Hello, world!"'
     ast = parser.parse(lexer.tokenize(text))
     print(ast)
