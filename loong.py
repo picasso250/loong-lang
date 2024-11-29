@@ -51,6 +51,8 @@ class VirtualMachine:
                 return left * right
             elif node[1] == '/':
                 return left / right
+            elif node[1] == '%':
+                return left % right
             elif node[1] == '>':
                 return left > right
             elif node[1] == '<':

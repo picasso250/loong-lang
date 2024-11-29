@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 class LoongLexer(Lexer):
     tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
+    literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
 
     FUNC = r'func'
     END = r'end'
@@ -59,7 +59,7 @@ class LoongParser(Parser):
         ('right', 'NOT'),             # Logical NOT
         ('left', '>', '<', 'EQUALS', 'GE', 'LE'),  # Comparison operators
         ('left', '+', '-'),            # Addition and subtraction
-        ('left', '*', '/'),            # Multiplication and division
+        ('left', '*', '/', '%'),            # Multiplication and division
         ('right', 'UMINUS', 'UADD'),           # Unary minus
     )
 
@@ -128,6 +128,7 @@ class LoongParser(Parser):
        'expr "-" expr',
        'expr "*" expr',
        'expr "/" expr',
+       'expr "%" expr',
        'expr ">" expr',
        'expr "<" expr',
        'expr EQUALS expr',
