@@ -45,6 +45,5 @@ obj.name = "LoongAI"          	None
 obj.name                      	"LoongAI"
 func getName(o): o.name end   	None
 getName(obj)                  	"LoongAI"
-obj.age                       	10
 obj.height = 15.5             	None
 obj.height                    	15.5
