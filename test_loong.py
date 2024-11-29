@@ -54,6 +54,22 @@ def test_loong():
         {"input": "arr[0] + arr[2]", "expected": 40},  # 新数组的元素求和
         {"input": "b = [1, 2] + [3, 4]", "expected": None},  # 数组拼接
         {"input": "b[3]", "expected": 4},  # 获取拼接后的元素
+
+        # 属性访问测试
+        {"input": "obj = {name: \"Loong\", age: 5}", "expected": None},  # 创建对象
+        {"input": "obj.name", "expected": "Loong"},  # 访问属性
+        {"input": "obj.age", "expected": 5},  # 访问数值属性
+        {"input": "obj.name = \"LoongAI\"", "expected": None},  # 修改属性
+        {"input": "obj.name", "expected": "LoongAI"},  # 验证属性修改
+        {"input": "func getName(o): o.name end", "expected": None},  # 定义获取属性的函数
+        {"input": "getName(obj)", "expected": "LoongAI"},  # 调用函数获取属性
+        {"input": "func setAge(o, newAge): o.age = newAge end", "expected": None},  # 定义设置属性的函数
+        {"input": "setAge(obj, 10)", "expected": None},  # 调用函数设置属性
+        {"input": "obj.age", "expected": 10},  # 验证属性修改
+        {"input": "obj.height = 15.5", "expected": None},  # 添加新属性
+        {"input": "obj.height", "expected": 15.5},  # 访问新属性
+        {"input": "func describe(o): \"Name: \" + o.name + \", Age: \" + o.age end", "expected": None},
+        {"input": "describe(obj)", "expected": "Name: LoongAI, Age: 10"},  # 函数返回字符串描述
     ]
 
     for i, test in enumerate(test_cases):

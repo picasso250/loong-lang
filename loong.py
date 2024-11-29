@@ -92,6 +92,8 @@ class VirtualMachine:
                     raise ValueError("属性访问出错")
         elif node[0] == 'array':
             return [self.eval(e, env) for e in node[1]]
+        elif node[0] == 'dict':
+            return {entry[0]: self.eval(entry[1], env) for entry in node[1]}
         elif node[0] == 'if_expr':
             cond = self.eval(node[1], env)
             return self.eval(node[2], env) if cond else self.eval(node[3], env)

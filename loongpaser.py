@@ -2,7 +2,7 @@ from sly import Lexer, Parser
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', '[', ']' }
 
@@ -12,6 +12,8 @@ class LoongLexer(Lexer):
     OR = r'or'
     XOR = r'xor'
     NOT = r'not'
+    LBRACE = r'{'
+    RBRACE = r'}'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
@@ -45,7 +47,6 @@ class LoongLexer(Lexer):
         print("Illegal character '%s'" % t.value[0])
         self.index += 1
 
-
 # 语法分析器
 class LoongParser(Parser):
     tokens = LoongLexer.tokens
@@ -78,6 +79,7 @@ class LoongParser(Parser):
     @_('statement_with_end')
     def statements(self, p):
         return ('statements', [p.statement_with_end])
+    
     # 语句
     @_('unary_exp ASSIGN expr')
     def statement(self, p):
@@ -92,6 +94,7 @@ class LoongParser(Parser):
     @_('expr')
     def statement(self, p):
         return p.expr
+    
     # 数组语法
     @_('"[" "]"')
     def expr(self, p):
@@ -100,6 +103,26 @@ class LoongParser(Parser):
     @_('"[" arg_list "]"')
     def expr(self, p):
         return ('array', p.arg_list)
+    
+    # 字典创建
+    @_('LBRACE dict_entries RBRACE')
+    def expr(self, p):
+        return ('dict', p.dict_entries)
+    @_('LBRACE  RBRACE')
+    def expr(self, p):
+        return ('dict', [])
+    @_('dict_entry')
+    def dict_entries(self, p):
+        return [p.dict_entry]
+
+    @_('dict_entries COMMA dict_entry')
+    def dict_entries(self, p):
+        return p.dict_entries + [p.dict_entry]
+
+    @_('NAME ":" expr')
+    def dict_entry(self, p):
+        return (p.NAME, p.expr)
+
     # 运算符
     @_('expr "+" expr',
        'expr "-" expr',
@@ -134,25 +157,25 @@ class LoongParser(Parser):
         return p.param_list + [p.NAME]
 
     @_('unary_exp')
-    def expr				(self, p):
+    def expr (self, p):
         return p.unary_exp
-    
+
     @_('postfix_exp')
-    def unary_exp		(self, p):
+    def unary_exp (self, p):
         return p.postfix_exp
     @_('NOT expr')
-    def unary_exp		(self, p):
-        return ('unaryop', 'not', p.unary_exp		)
-    @_('"-" unary_exp		 %prec UMINUS')
-    def unary_exp		(self, p):
-        return ('unaryop', '-', p.unary_exp		)
-    @_('"+" unary_exp		 %prec UADD')
-    def unary_exp		(self, p):
-        return ('unaryop', '+', p.unary_exp		)
+    def unary_exp (self, p):
+        return ('unaryop', 'not', p.unary_exp )
+    @_('"-" unary_exp %prec UMINUS')
+    def unary_exp (self, p):
+        return ('unaryop', '-', p.unary_exp )
+    @_('"+" unary_exp %prec UADD')
+    def unary_exp (self, p):
+        return ('unaryop', '+', p.unary_exp )
     @_('"~" unary_exp')
-    def unary_exp		(self, p):
-        return ('unaryop', '~', p.unary_exp		)
-    
+    def unary_exp (self, p):
+        return ('unaryop', '~', p.unary_exp )
+
     @_('primary_exp ')
     def postfix_exp(self, p):
         return p.primary_exp
@@ -199,6 +222,7 @@ class LoongParser(Parser):
     @_('NUMBER')
     def const(self, p):
         return ('num', p.NUMBER)
+
     def error(self, p):
         if p:
             print(f"Syntax error at token {p.type}({p.value}) in line {p.lineno}")
