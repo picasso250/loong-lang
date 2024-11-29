@@ -41,7 +41,10 @@ class VirtualMachine:
             left = self.eval(node[2], env)
             right = self.eval(node[3], env)
             if node[1] == '+':
-                return left + right
+                if isinstance(left, str):  # 如果 left 是字符串
+                    return left + str(right)  # 确保 right 被转换为字符串
+                else:
+                    return left + right
             elif node[1] == '-':
                 return left - right
             elif node[1] == '*':

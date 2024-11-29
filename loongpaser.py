@@ -86,9 +86,9 @@ class LoongParser(Parser):
         return ('assign', p.unary_exp, p.expr)
 
     # 函数定义语句
-    @_('FUNC NAME "(" param_list ")" ":" expr END')
+    @_('FUNC NAME "(" param_list ")" ":" statements END')
     def statement_with_end(self, p):
-        return ('func_def', p.NAME, p.param_list, p.expr)
+        return ('func_def', p.NAME, p.param_list, p.statements)
 
     # 变量赋值
     @_('expr')
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# 测试逻辑运算符
-        obj.name
+        func setAge(o, newAge): o.age = newAge end
     '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
