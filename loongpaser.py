@@ -4,7 +4,7 @@ from sly import Lexer, Parser
 class LoongLexer(Lexer):
     tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', ',', '[', ']' }
+    literals = { '=', '+', '-', '*', '/', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
 
     FUNC = r'func'
     END = r'end'
@@ -191,9 +191,9 @@ class LoongParser(Parser):
     def postfix_exp(self, p):
         return ('array_access', p.postfix_exp, p.expr)
     # 属性访问
-    @_('postfix_exp "." expr')
+    @_('postfix_exp "." NAME')
     def postfix_exp(self, p):
-        return ('prop_access', p.postfix_exp, p.expr)
+        return ('prop_access', p.postfix_exp, p.NAME)
     
     @_('"(" expr ")"')
     def primary_exp(self, p):
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# 测试逻辑运算符
-        a=11
+        obj.name
     '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)

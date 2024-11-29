@@ -85,7 +85,7 @@ class VirtualMachine:
                     raise ValueError("数组索引出错")
             elif target[0] == 'prop_access':
                 obj = self.eval(target[1], env)
-                prop = self.eval(target[2], env)
+                prop = target[2]
                 if isinstance(obj, dict):
                     obj[prop] = value
                 else:
@@ -106,7 +106,7 @@ class VirtualMachine:
                 raise ValueError("数组索引出错")
         elif node[0] == 'prop_access':
             obj = self.eval(node[1], env)
-            prop = self.eval(node[2], env)
+            prop = node[2]
             if isinstance(obj, dict) and prop in obj:
                 return obj[prop]
             else:
