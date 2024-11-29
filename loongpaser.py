@@ -59,7 +59,7 @@ class LoongParser(Parser):
         ('left', '>', '<', 'EQUALS', 'GE', 'LE'),  # Comparison operators
         ('left', '+', '-'),            # Addition and subtraction
         ('left', '*', '/'),            # Multiplication and division
-        ('right', 'UMINUS'),           # Unary minus
+        ('right', 'UMINUS', 'UADD'),           # Unary minus
     )
 
     def __init__(self):
@@ -79,9 +79,9 @@ class LoongParser(Parser):
     def statements(self, p):
         return ('statements', [p.statement_with_end])
     # 语句
-    @_('NAME ASSIGN expr')
+    @_('unary_exp ASSIGN expr')
     def statement(self, p):
-        return ('assign', p.NAME, p.expr)
+        return ('assign', p.unary_exp, p.expr)
 
     # 函数定义语句
     @_('FUNC NAME "(" param_list ")" ":" expr END')
@@ -119,46 +119,10 @@ class LoongParser(Parser):
     def expr(self, p):
         return ('logicop', p[1], p.expr0, p.expr1)
 
-    @_('NOT expr')
-    def expr(self, p):
-        return ('unaryop', 'not', p.expr)
-
-    @_('"-" expr %prec UMINUS')
-    def expr(self, p):
-        return ('unaryop', '-', p.expr)
-
-    @_('"(" expr ")"')
-    def expr(self, p):
-        return p.expr
-
     # 三元运算符
     @_('expr "?" expr ":" expr')
     def expr(self, p):
-        return ('ternary', p.expr0, p.expr1, p.expr2)
-
-    # 数字
-    @_('NUMBER')
-    def expr(self, p):
-        return ('num', p.NUMBER)
-
-    # 字符串
-    @_('STRING')
-    def expr(self, p):
-        return ('str', p.STRING)
-
-    # 变量名
-    @_('NAME')
-    def expr(self, p):
-        return ('name', p.NAME)
-
-    # 函数调用
-    @_('NAME "(" arg_list ")"')
-    def expr(self, p):
-        return ('func_call', ('name', p.NAME), p.arg_list)
-
-    @_('"(" expr ")" "(" arg_list ")"')
-    def expr(self, p):
-        return ('func_call', p.expr, p.arg_list)
+        return ('if_expr', p.expr0, p.expr1, p.expr2)
 
     # 参数列表
     @_('NAME')
@@ -169,6 +133,60 @@ class LoongParser(Parser):
     def param_list(self, p):
         return p.param_list + [p.NAME]
 
+    @_('unary_exp')
+    def expr				(self, p):
+        return p.unary_exp
+    
+    @_('postfix_exp')
+    def unary_exp		(self, p):
+        return p.postfix_exp
+    @_('NOT expr')
+    def unary_exp		(self, p):
+        return ('unaryop', 'not', p.unary_exp		)
+    @_('"-" unary_exp		 %prec UMINUS')
+    def unary_exp		(self, p):
+        return ('unaryop', '-', p.unary_exp		)
+    @_('"+" unary_exp		 %prec UADD')
+    def unary_exp		(self, p):
+        return ('unaryop', '+', p.unary_exp		)
+    @_('"~" unary_exp')
+    def unary_exp		(self, p):
+        return ('unaryop', '~', p.unary_exp		)
+    
+    @_('primary_exp ')
+    def postfix_exp(self, p):
+        return p.primary_exp
+    # 函数调用
+    @_('postfix_exp "(" arg_list ")"')
+    def postfix_exp(self, p):
+        return ('func_call', p.postfix_exp, p.arg_list)
+    @_('postfix_exp "(" ")"')
+    def postfix_exp(self, p):
+        return ('func_call', p.postfix_exp, [])
+    # 数组访问
+    @_('postfix_exp "[" expr "]"')
+    def postfix_exp(self, p):
+        return ('array_access', p.postfix_exp, p.expr)
+    # 属性访问
+    @_('postfix_exp "." expr')
+    def postfix_exp(self, p):
+        return ('prop_access', p.postfix_exp, p.expr)
+    
+    @_('"(" expr ")"')
+    def primary_exp(self, p):
+        return p.expr
+    # 字符串
+    @_('STRING')
+    def primary_exp(self, p):
+        return ('str', p.STRING)
+    # 变量名
+    @_('NAME')
+    def primary_exp(self, p):
+        return ('name', p.NAME)
+    @_('const')
+    def primary_exp(self, p):
+        return p.const
+    
     # 参数列表
     @_('expr')
     def arg_list(self, p):
@@ -177,7 +195,10 @@ class LoongParser(Parser):
     @_('arg_list COMMA expr')
     def arg_list(self, p):
         return p.arg_list + [p.expr]
-
+    # 数字
+    @_('NUMBER')
+    def const(self, p):
+        return ('num', p.NUMBER)
     def error(self, p):
         if p:
             print(f"Syntax error at token {p.type}({p.value}) in line {p.lineno}")
@@ -190,8 +211,7 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# 测试逻辑运算符
-        a = 1 and 0 or 1 xor 0;
-        b = not (1 and 0)
+        a=11
     '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)

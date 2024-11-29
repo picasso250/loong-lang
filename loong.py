@@ -72,10 +72,43 @@ class VirtualMachine:
             elif node[1] == '-':
                 return -self.eval(node[2], env)
         elif node[0] == 'assign':
-            env.set(node[1], self.eval(node[2], env))
-        elif node[0] == 'ternary':
+            value = self.eval(node[2], env)
+            target = node[1]
+            if target[0] == 'name':
+                env.set(target[1], value)
+            elif target[0] == 'array_access':
+                array = self.eval(target[1], env)
+                index = self.eval(target[2], env)
+                if isinstance(array, list) and 0 <= index < len(array):
+                    array[index] = value
+                else:
+                    raise ValueError("数组索引出错")
+            elif target[0] == 'prop_access':
+                obj = self.eval(target[1], env)
+                prop = self.eval(target[2], env)
+                if isinstance(obj, dict):
+                    obj[prop] = value
+                else:
+                    raise ValueError("属性访问出错")
+        elif node[0] == 'array':
+            return [self.eval(e, env) for e in node[1]]
+        elif node[0] == 'if_expr':
             cond = self.eval(node[1], env)
             return self.eval(node[2], env) if cond else self.eval(node[3], env)
+        elif node[0] == 'array_access':
+            array = self.eval(node[1], env)
+            index = self.eval(node[2], env)
+            if isinstance(array, list) and 0 <= index < len(array):
+                return array[index]
+            else:
+                raise ValueError("数组索引出错")
+        elif node[0] == 'prop_access':
+            obj = self.eval(node[1], env)
+            prop = self.eval(node[2], env)
+            if isinstance(obj, dict) and prop in obj:
+                return obj[prop]
+            else:
+                raise ValueError("属性访问出错")
         elif node[0] == 'func_def':
             _, name, params, body = node  # Function name, parameters, body
             env.set(name, ('func', params, body, env))

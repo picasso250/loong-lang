@@ -1,6 +1,6 @@
 # Loong Interpreter
 
-This program implements a simple interpreter capable of parsing and executing basic mathematical expressions, variable assignments, ternary operators, function definitions, and calls.
+This program implements a simple interpreter capable of parsing and executing basic mathematical expressions, variable assignments, if_expr operators, function definitions, and calls.
 
 ## Features
 
@@ -9,7 +9,7 @@ The interpreter supports the following features using the `sly` library for lexi
 - Basic arithmetic operations: addition, subtraction, multiplication, division.
 - Comparison operators: greater than, less than, equal to.
 - Variable assignment and reference.
-- Support for ternary operators.
+- Support for if_expr operators.
 - Support for function definitions and calls.
 
 ## Syntax Examples
