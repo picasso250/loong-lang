@@ -1,21 +1,33 @@
-start: statements
+%import common.ESCAPED_STRING   -> STRING
+%import common.SIGNED_NUMBER    -> NUMBER
+%import common.CNAME -> NAME
+%import common.WS
+%ignore WS
+
+?start: statements
 
 statements: statement (statement)*
 
-statement: "let" NAME "=" expr ";"
-         | unary_exp "=" expr ";"
-         | "fun" NAME "(" (NAME ("," NAME)*)? ")" ":" statements "end"
+?statement: let_stmt
+         | assign_stmt
+         | func_stmt
          | expr ";"
+
+let_stmt: "let" NAME "=" expr ";"
+
+assign_stmt: unary_exp "=" expr ";"
+
+func_stmt: "fun" NAME params ":" statements "end"
+
+params: "(" (NAME ("," NAME)*)? ")"
 
 expr: "[" "]"
     | "[" arg_list "]"
-    | "{" dict_entries "}"
-    | "{" "}"
+    | dict
     | conditional_exp
 
-dict_entries: dict_entry ("," dict_entry)*
-
-dict_entry: NAME ":" expr
+dict: "{" [pair ("," pair)*] "}"
+pair: NAME ":" expr
 
 ?conditional_exp: logical_or_exp
                | logical_or_exp "?" expr ":" conditional_exp
@@ -81,8 +93,3 @@ arg_list: expr ("," expr)*
 
 ?const: NUMBER
 
-NAME: /[a-zA-Z_][a-zA-Z_0-9]*/
-%import common.ESCAPED_STRING   -> STRING
-%import common.SIGNED_NUMBER    -> NUMBER
-%import common.WS
-%ignore WS
