@@ -1,7 +1,7 @@
 import csv
 from loonglexer import LoongLexer
 from loongpaser import LoongParser
-from loong import VirtualMachine
+from loong import VirtualMachine,parser,LoongTransformer
 from colorama import init, Fore, Style
 from termcolor import colored
 
@@ -41,8 +41,6 @@ def parse_test_cases(file_path):
 
 def test_loong():
     init()  # 初始化 colorama
-    lexer = LoongLexer()
-    parser = LoongParser()
     vm = VirtualMachine()
 
     # 从CSV文件加载测试用例
@@ -50,7 +48,8 @@ def test_loong():
 
     for i, test in enumerate(test_cases):
         try:
-            ast = parser.parse(lexer.tokenize(test["input"]))
+            tree = parser.parse(test["input"])
+            ast = LoongTransformer().transform(tree)
             result = vm.eval(ast)
             print(colored(test["input"], 'grey'), "==>", colored(result, 'grey'))
             assert result == test["expected"], f"{test['input']} failed: expected {test['expected']}, got {result}"

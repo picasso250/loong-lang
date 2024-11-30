@@ -5,6 +5,93 @@ from colorama import init
 from termcolor import colored
 from loongast import *
 
+from lark import Lark, Transformer, v_args
+
+from lark import Transformer
+from loongast import *
+
+class LoongTransformer(Transformer):
+    
+    # Statements
+    def statements(self, items):
+        return Statements(items)
+
+    # Let statement
+    def let_stmt(self, items):
+        target, value = items
+        return Let(target, value)
+
+    # Assign statement
+    def assign_stmt(self, items):
+        target, value = items
+        return Assign(target, value)
+
+    # Function Definition
+    def func_stmt(self, items):
+        name, params, body = items
+        return FuncDef(name, params, body)
+    params=list
+    # Expression (conditional, binop, etc.)
+    def expr(self, items):
+        # Here you need to distinguish between different kinds of expressions
+        if isinstance(items[0], str):  # Simple name or constant
+            return Name(items[0])
+        return items[0]  # Otherwise return the first item, it could be a binop or func call
+
+    # Binary Operation (binops)
+    def binop(self, items):
+        left, operator, right = items
+        return BinOp(operator, left, right)
+
+    # Unary Operation
+    def unaryop(self, items):
+        operator, operand = items
+        return UnaryOp(operator, operand)
+
+    # Function Call
+    def func_call(self, items):
+        fun, args = items[0], items[1:]
+        return FuncCall(fun, args)
+
+    # Conditional Expressions (ternary operator)
+    def conditional_exp(self, items):
+        condition, true_expr, false_expr = items
+        return IfExpr(condition, true_expr, false_expr)
+
+    # Dict
+    def dict(self, items):
+        print(items)
+        elements = {key: value for key, value in items}
+        return Dict(elements)
+
+    # Num (numbers)
+    def NUMBER(self, items):
+        return Num(items[0])
+
+    # Name (variable name)
+    def NAME(self, items):
+        return Name(items[0])
+
+    # Array (array initialization)
+    def array(self, items):
+        return Array(items)
+
+    # String
+    def string(self, items):
+        return Str(items[0])
+
+    # # Default for other expressions or statements
+    # def __default__(self, data, children_lists, meta):
+    #     return data[0]  # In case of unhandled rules, return the first item
+
+
+# Read the grammar from the external EBNF file
+with open('grammar.ebnf', 'r', encoding='utf-8') as f:
+    grammar = f.read()
+
+# Create the Lark parser using the external grammar
+parser = Lark(grammar, start='start', parser='lalr')
+
 class Env:
     def __init__(self, parent=None):
         self.variables = {}

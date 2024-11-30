@@ -1,6 +1,5 @@
 代码                          	期望结果        	注释
-a = 10                        	None            	基本功能
-a + 5                         	15
+let a = 10; a + 5                  	15              	基本功能
 10 > 5 ? 1 : 0                	1
 10 < 5 ? 1 : 0                	0
 
@@ -18,13 +17,13 @@ b * 3.5                       	7.0
 c = 1.5                       	None
 c / 0.5                       	3.0
 
-fun add(a, b): a + b end     	None            	函数定义与调用测试
+fun add(a, b): a + b end      	None            	函数定义与调用测试
 add(2, 3)                     	5
-fun mul(a, b): a * b end     	None
+fun mul(a, b): a * b end      	None
 mul(4, 5)                     	20
-fun square(x): x * x end     	None
+fun square(x): x * x end      	None
 square(6)                     	36
-fun identity(x): x end       	None
+fun identity(x): x end        	None
 identity(42)                  	42
 
 arr = [1, 2, 3]               	None            	数组测试
@@ -43,7 +42,7 @@ obj.name                      	"Loong"
 obj.age                       	5
 obj.name = "LoongAI"          	None
 obj.name                      	"LoongAI"
-fun getName(o): o.name end   	None
+fun getName(o): o.name end    	None
 getName(obj)                  	"LoongAI"
 obj.height = 15.5             	None
 obj.height                    	15.5

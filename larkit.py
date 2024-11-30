@@ -32,10 +32,9 @@ class LoongTransformer(Transformer):
         return items[0]  # Otherwise return the first item, it could be a binop or func call
 
     # Binary Operation (binops)
-    def binop(self, items):
+    def additive_exp(self, items):
         left, operator, right = items
-        return BinOp(operator, left, right)
-
+        return BinOp(operator[0], left, right)
     # Unary Operation
     def unaryop(self, items):
         operator, operand = items
@@ -73,7 +72,7 @@ class LoongTransformer(Transformer):
     def string(self, items):
         return Str(items[0])
 
-    # # Default for other expressions or statements
+    # Default for other expressions or statements
     # def __default__(self, data, children_lists, meta):
     #     return data[0]  # In case of unhandled rules, return the first item
 
@@ -87,14 +86,15 @@ parser = Lark(grammar, start='start', parser='lalr')
 
 # Sample input to test the grammar
 sample_input = """
-let x = 5;
+let a = 10;
+a + 5
 """
 
 # Parsing the input
 try:
     tree = parser.parse(sample_input)
     print("Parsing successful!")
-    # print(tree)
+    print(tree)
     # print(tree.pretty())
     ast = LoongTransformer().transform(tree)
     print(ast)

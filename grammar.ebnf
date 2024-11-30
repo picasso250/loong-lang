@@ -6,7 +6,7 @@
 
 ?start: statements
 
-statements: statement (statement)*
+statements: (statement)* expr
 
 ?statement: let_stmt
          | assign_stmt
@@ -62,7 +62,7 @@ pair: NAME ":" expr
                 | shift_expression ">>" additive_exp
 
 ?additive_exp: mult_exp
-            | additive_exp "+" mult_exp
+            | additive_exp ADD mult_exp
             | additive_exp "-" mult_exp
 
 ?mult_exp: cast_exp
@@ -93,3 +93,4 @@ arg_list: expr ("," expr)*
 
 ?const: NUMBER
 
+ADD: "+"
