@@ -1,0 +1,59 @@
+<statements> ::= <statement> ";" <statements>
+               | <statement_with_end> <statements>
+               | <statement>
+               | <statement_with_end>
+
+<statement> ::= <unary_exp> ASSIGN <expr>
+              | <expr>
+
+<statement_with_end> ::= FUNC NAME "(" <param_list> ")" ":" <statements> END
+
+<expr> ::= "[" "]"
+         | "[" <arg_list> "]"
+         | LBRACE <dict_entries> RBRACE
+         | LBRACE RBRACE
+         | <expr> "+" <expr>
+         | <expr> "-" <expr>
+         | <expr> "*" <expr>
+         | <expr> "/" <expr>
+         | <expr> "%" <expr>
+         | <expr> ">" <expr>
+         | <expr> "<" <expr>
+         | <expr> EQUALS <expr>
+         | <expr> GE <expr>
+         | <expr> LE <expr>
+         | <expr> AND <expr>
+         | <expr> OR <expr>
+         | <expr> XOR <expr>
+         | <expr> "?" <expr> ":" <expr>
+         | <unary_exp>
+
+<unary_exp> ::= <postfix_exp>
+              | NOT <expr>
+              | "-" <unary_exp>
+              | "+" <unary_exp>
+              | "~" <unary_exp>
+
+<postfix_exp> ::= <primary_exp>
+                | <postfix_exp> "(" <arg_list> ")"
+                | <postfix_exp> "(" ")"
+                | <postfix_exp> "[" <expr> "]"
+                | <postfix_exp> "." NAME
+
+<primary_exp> ::= "(" <expr> ")"
+                | STRING
+                | NAME
+                | <const>
+
+<param_list> ::= NAME
+               | <param_list> COMMA NAME
+
+<arg_list> ::= <expr>
+             | <arg_list> COMMA <expr>
+
+<dict_entries> ::= <dict_entry>
+                 | <dict_entries> COMMA <dict_entry>
+
+<dict_entry> ::= NAME ":" <expr>
+
+<const> ::= NUMBER

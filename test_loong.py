@@ -1,5 +1,6 @@
 import csv
-from loongpaser import LoongLexer, LoongParser
+from longlexer import LoongLexer
+from loongpaser import LoongParser
 from loong import VirtualMachine
 from colorama import init, Fore, Style
 from termcolor import colored

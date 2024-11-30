@@ -1,5 +1,6 @@
 import sys
-from loongpaser import LoongLexer, LoongParser
+from longlexer import LoongLexer
+from loongpaser import LoongParser
 from pretty_dump_json import pretty_dump_json
 from colorama import init, Fore, Style
 from termcolor import colored

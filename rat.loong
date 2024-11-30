@@ -12,8 +12,7 @@ func make_rat(n, d):
     denom = d / g;         # 计算简化后的分母
     {
         num: num,
-        denom: denom,
-        
+        denom: denom
     }
 end
 
@@ -23,10 +22,10 @@ func add_rats(a, b):
     new_denom = a.denom * b.denom;
 
     # 返回新的有理数
-    make_rat(new_num, new_denom);
+    make_rat(new_num, new_denom)
 end
 
 # 示例调用
-r1 = make_rat(3, 4)      # 创建有理数 3/4
-r2 = make_rat(2, 3)      # 创建有理数 2/3
-r3 = add_rats(r1, r2)         # 计算 r1 + r2
+r1 = make_rat(3, 4);      # 创建有理数 3/4
+r2 = make_rat(2, 3);      # 创建有理数 2/3
+add_rats(r1, r2)         # 计算 r1 + r2
