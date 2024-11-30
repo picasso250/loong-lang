@@ -21,13 +21,13 @@ func_stmt: "fun" NAME params ":" statements "end"
 
 params: "(" (NAME ("," NAME)*)? ")"
 
-expr: "[" "]"
-    | "[" arg_list "]"
+?expr: list
     | dict
     | conditional_exp
 
 dict: "{" [pair ("," pair)*] "}"
 pair: NAME ":" expr
+list: "[" [expr ("," expr)*] "]"
 
 ?conditional_exp: logical_or_exp
                | logical_or_exp "?" expr ":" conditional_exp
@@ -35,47 +35,43 @@ pair: NAME ":" expr
 ?logical_or_exp: logical_and_exp
               | logical_or_exp "or" logical_and_exp
 
-?logical_and_exp: inclusive_or_exp
-               | logical_and_exp "and" inclusive_or_exp
+?logical_and_exp: bitwise_exp
+               | logical_and_exp "and" bitwise_exp
 
-?inclusive_or_exp: exclusive_or_exp
-                | inclusive_or_exp "|" exclusive_or_exp
-
-?exclusive_or_exp: and_exp
-                | exclusive_or_exp "^" and_exp
-
-?and_exp: equality_exp
-       | and_exp "&" equality_exp
+?bitwise_exp: equality_exp
+       | bitwise_exp BITWISE_AND equality_exp
+       | bitwise_exp BITWISE_XOR equality_exp
+       | bitwise_exp BITWISE_OR equality_exp
 
 ?equality_exp: relational_exp
-            | equality_exp "==" relational_exp
-            | equality_exp "!=" relational_exp
+            | equality_exp EQ relational_exp
+            | equality_exp NE relational_exp
 
 ?relational_exp: shift_expression
-              | relational_exp "<" shift_expression
-              | relational_exp ">" shift_expression
-              | relational_exp "<=" shift_expression
-              | relational_exp ">=" shift_expression
+              | relational_exp LT shift_expression
+              | relational_exp GT shift_expression
+              | relational_exp LE shift_expression
+              | relational_exp GE shift_expression
 
 ?shift_expression: additive_exp
-                | shift_expression "<<" additive_exp
-                | shift_expression ">>" additive_exp
+                | shift_expression SHL additive_exp
+                | shift_expression SHR additive_exp
 
 ?additive_exp: mult_exp
             | additive_exp ADD mult_exp
-            | additive_exp "-" mult_exp
+            | additive_exp SUB mult_exp
 
 ?mult_exp: cast_exp
-        | mult_exp "*" cast_exp
-        | mult_exp "/" cast_exp
-        | mult_exp "%" cast_exp
+        | mult_exp MUL cast_exp
+        | mult_exp DIV cast_exp
+        | mult_exp MOD cast_exp
 
 ?cast_exp: unary_exp
 
-?unary_exp: "NOT" expr
-         | "-" unary_exp
-         | "+" unary_exp
-         | "~" unary_exp
+?unary_exp: NOT expr
+         | SUB unary_exp
+         | ADD unary_exp
+         | BITWISE_NOT unary_exp
          | postfix_exp
 
 ?postfix_exp: primary_exp
@@ -89,8 +85,27 @@ pair: NAME ":" expr
            | NAME
            | const
 
-arg_list: expr ("," expr)*
+arg_list: [expr ("," expr)*]
 
 ?const: NUMBER
 
 ADD: "+"
+SUB: "-"
+MUL: "*"
+DIV: "/"
+MOD: "%"
+EQ: "=="
+NE: "!="
+LT: "<"
+GT: ">"
+LE: "<="
+GE: ">="
+SHL: "<<"
+SHR: ">>"
+
+NOT: "not"
+
+BITWISE_NOT: "~"
+BITWISE_XOR: "^"
+BITWISE_AND: "&"
+BITWISE_OR: "|"

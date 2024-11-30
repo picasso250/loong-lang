@@ -23,7 +23,8 @@ class LoongTransformer(Transformer):
     def func_stmt(self, items):
         name, params, body = items
         return FuncDef(name, params, body)
-    params=list
+    params = list
+
     # Expression (conditional, binop, etc.)
     def expr(self, items):
         # Here you need to distinguish between different kinds of expressions
@@ -35,6 +36,43 @@ class LoongTransformer(Transformer):
     def additive_exp(self, items):
         left, operator, right = items
         return BinOp(operator[0], left, right)
+
+    def mult_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def shift_expression(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def relational_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def equality_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def and_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def inclusive_or_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def exclusive_or_exp(self, items):
+        left, operator, right = items
+        return BinOp(operator[0], left, right)
+
+    def logical_and_exp(self, items):
+        left, right = items
+        return BinOp('and', left, right)
+
+    def logical_or_exp(self, items):
+        left, right = items
+        return BinOp('or', left, right)
+    
     # Unary Operation
     def unaryop(self, items):
         operator, operand = items
@@ -86,8 +124,9 @@ parser = Lark(grammar, start='start', parser='lalr')
 
 # Sample input to test the grammar
 sample_input = """
-let a = 10;
-a + 5
+let a = ~3;
+a>3?1:2;
+{a:2}
 """
 
 # Parsing the input
@@ -95,8 +134,9 @@ try:
     tree = parser.parse(sample_input)
     print("Parsing successful!")
     print(tree)
-    # print(tree.pretty())
-    ast = LoongTransformer().transform(tree)
-    print(ast)
+    print(tree.pretty())
+    # ast = LoongTransformer().transform(tree)
+    # print(ast)
 except Exception as e:
     print(f"Error: {e}")
+
