@@ -1,4 +1,4 @@
-import sys
+import argparse
 from longlexer import LoongLexer
 from loongpaser import LoongParser
 from colorama import init
@@ -26,7 +26,35 @@ class Env:
 class VirtualMachine:
     def __init__(self):
         self.global_env = Env()  # Global environment
+    def add_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left + right
+        elif isinstance(left, str):
+            result = left + str(right)
+        elif isinstance(left, list):
+            if isinstance(right, list):
+                result = left + right
+            else:
+                raise TypeError("Cannot add non-list to a list")
+        elif isinstance(left, dict):
+            if '__add__' in left:
+                result = self.handle_function_call(left['__add__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be added directly unless they implement __add__")
+        else:
+            raise TypeError("Unsupported operand type(s) for +")
 
+        return result
+    def handle_function_call(self, func_def, arg_values, env):
+        local_env = Env(parent=func_def.env)
+        for i in range(len(func_def.param_list)):
+            local_env.set(func_def.param_list[i], arg_values[i])
+
+        result = None
+        for stmt in func_def.statements:
+            result = self.eval(stmt, local_env)
+        print("return", result)
+        return result
     def eval(self, node, env=None):
         if env is None:
             env = self.global_env  # Default to global environment
@@ -45,7 +73,7 @@ class VirtualMachine:
             right = self.eval(node.right, env)
             
             if node.operator == '+':
-                result = left + right
+                result = self.add_operator(left, right, env)
             elif node.operator == '-':
                 result = left - right
             elif node.operator == '*':
@@ -107,17 +135,7 @@ class VirtualMachine:
         elif isinstance(node, FuncCall):
             func_def = self.eval(node.func, env)
             arg_values = [self.eval(arg, env) for arg in node.args]
-
-            if func_def:
-                local_env = Env(parent=func_def.env)
-                for i in range(len(func_def.param_list)):
-                    local_env.set(func_def.param_list[i], arg_values[i])
-
-                result = None
-                for stmt in func_def.statements:
-                    result = self.eval(stmt, local_env)
-                print(node.func.name if isinstance(node.func, Name) else "","return",result)
-                return result
+            return self.handle_function_call(func_def, arg_values, env)
         elif isinstance(node, ArrayAccess):
             array = self.eval(node.array, env)
             index = self.eval(node.index, env)
@@ -128,9 +146,8 @@ class VirtualMachine:
         elif isinstance(node, Array):
             return [self.eval(item, env) for item in node.elements]
         elif isinstance(node, Dict):
-            return {k: self.eval(v, env) for k, v in node.elements.items()}
-import argparse
-import sys
+            d = {k: self.eval(v, env) for k, v in node.elements.items()}
+            return d
 
 def main():
     # Set up argparse

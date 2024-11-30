@@ -10,22 +10,22 @@ func make_rat(n, d):
     g = gcd(n, d);         # 计算 n 和 d 的 GCD
     num = n // g;           # 计算简化后的分子
     denom = d // g;         # 计算简化后的分母
+    func add_rats(a, b):
+        # 计算新的分子和分母
+        new_num = a.num * b.denom + b.num * a.denom;
+        new_denom = a.denom * b.denom;
+
+        # 返回新的有理数
+        make_rat(new_num, new_denom)
+    end
     {
         num: num,
-        denom: denom
+        denom: denom,
+        __add__: add_rats
     }
-end
-
-func add_rats(a, b):
-    # 计算新的分子和分母
-    new_num = a.num * b.denom + b.num * a.denom;
-    new_denom = a.denom * b.denom;
-
-    # 返回新的有理数
-    make_rat(new_num, new_denom)
 end
 
 # 示例调用
 r1 = make_rat(3, 4);      # 创建有理数 3/4
 r2 = make_rat(2, 3);      # 创建有理数 2/3
-add_rats(r1, r2)         # 计算 r1 + r2
+r1 + r2

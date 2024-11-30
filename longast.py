@@ -9,7 +9,7 @@ class Assign:
         self.target = target
         self.value = value
 
-    def __repr__(self):
+    def __str__(self):
         return f"Assign(target={self.target}, value={self.value})"
 
 
@@ -22,7 +22,7 @@ class Statements:
         """
         self.statements = statements
 
-    def __repr__(self):
+    def __str__(self):
         return f"Statements({self.statements})"
 
 
@@ -39,7 +39,7 @@ class BinOp:
         self.left = left
         self.right = right
 
-    def __repr__(self):
+    def __str__(self):
         return f"BinOp(operator={self.operator}, left={self.left}, right={self.right})"
 
 
@@ -54,7 +54,7 @@ class UnaryOp:
         self.operator = operator
         self.operand = operand
 
-    def __repr__(self):
+    def __str__(self):
         return f"UnaryOp(operator={self.operator}, operand={self.operand})"
 
 
@@ -71,7 +71,7 @@ class LogicOp:
         self.left = left
         self.right = right
 
-    def __repr__(self):
+    def __str__(self):
         return f"LogicOp(operator={self.operator}, left={self.left}, right={self.right})"
 
 
@@ -88,7 +88,7 @@ class IfExpr:
         self.true_expr = true_expr
         self.false_expr = false_expr
 
-    def __repr__(self):
+    def __str__(self):
         return f"IfExpr(condition={self.condition}, true_expr={self.true_expr}, false_expr={self.false_expr})"
 
 
@@ -103,7 +103,7 @@ class FuncCall:
         self.func = func
         self.args = args
 
-    def __repr__(self):
+    def __str__(self):
         return f"FuncCall(func={self.func}, args={self.args})"
 
 
@@ -120,7 +120,7 @@ class FuncDef:
         self.param_list = param_list
         self.statements = statements
 
-    def __repr__(self):
+    def __str__(self):
         return f"FuncDef(\n\tname={self.name}, \n\tparam_list={self.param_list}, \n\tstatements={self.statements})"
 
 
@@ -135,7 +135,7 @@ class ArrayAccess:
         self.array = array
         self.index = index
 
-    def __repr__(self):
+    def __str__(self):
         return f"ArrayAccess(array={self.array}, index={self.index})"
 
 
@@ -150,7 +150,7 @@ class PropAccess:
         self.obj = obj
         self.property_name = property_name
 
-    def __repr__(self):
+    def __str__(self):
         return f"PropAccess(obj={self.obj}, property_name={self.property_name})"
 
 
@@ -163,7 +163,7 @@ class Num:
         """
         self.value = value
 
-    def __repr__(self):
+    def __str__(self):
         return f"Num(value={self.value})"
 
 
@@ -176,7 +176,7 @@ class Name:
         """
         self.name = name
 
-    def __repr__(self):
+    def __str__(self):
         return f"Name(name={self.name})"
 
 
@@ -189,7 +189,7 @@ class Str:
         """
         self.value = value
 
-    def __repr__(self):
+    def __str__(self):
         return f"Str(value={self.value})"
 
 
@@ -202,9 +202,15 @@ class Dict:
         """
         self.elements = elements
 
-    def __repr__(self):
-        return f"Dict({self.elements})"
-
+    def __str__(self):
+        lines = []
+        for key, value in self.elements.items():
+            if key.startswith("__") and key.endswith("__"):
+                value_repr = "..."
+            else:
+                value_repr = repr(value)
+            lines.append(f"  {repr(key)}: {value_repr}")
+        return "Dict(\n" + ",\n".join(lines) + "\n)"
 
 class Array:
     def __init__(self, elements: list):
@@ -215,5 +221,5 @@ class Array:
         """
         self.elements = elements
 
-    def __repr__(self):
+    def __str__(self):
         return f"Array({self.elements})"
