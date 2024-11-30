@@ -5,7 +5,6 @@ from colorama import init
 from termcolor import colored
 from longast import *
 
-# Environment class
 class Env:
     def __init__(self, parent=None):
         self.variables = {}
@@ -21,6 +20,14 @@ class Env:
             return self.parent.lookup(name, default)
         else:
             return default
+
+    def has(self, name):
+        if name in self.variables:
+            return True
+        elif self.parent:
+            return self.parent.has(name)
+        else:
+            return False
 
 # Virtual Machine
 class VirtualMachine:
@@ -184,11 +191,21 @@ class VirtualMachine:
                 return not self.eval(node.operand, env)
             elif node.operator == '-':
                 return -self.eval(node.operand, env)
+        elif isinstance(node, Let):
+            value = self.eval(node.value, env)
+            target = node.target
+            if env.has(target):
+                raise Exception(f"Variable '{target}' is already defined")
+            print("let", target, "=", value)
+            env.set(target, value)
+
         elif isinstance(node, Assign):
             value = self.eval(node.value, env)
             target = node.target
             if isinstance(target, Name):
-                print("set",target.name,"=",value)
+                if not env.has(target.name):
+                    raise Exception(f"Variable '{target.name}' is not defined")
+                print("set", target.name, "=", value)
                 env.set(target.name, value)
             elif isinstance(target, ArrayAccess):
                 array = self.eval(target.array, env)
@@ -197,6 +214,7 @@ class VirtualMachine:
             elif isinstance(target, PropAccess):
                 obj = self.eval(target.obj, env)
                 obj[target.prop] = value
+
         elif isinstance(node, IfExpr):
             cond = self.eval(node.condition, env)
             return self.eval(node.true_expr, env) if cond else self.eval(node.false_expr, env)

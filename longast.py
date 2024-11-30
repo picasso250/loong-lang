@@ -1,3 +1,16 @@
+class Let:
+    def __init__(self, target, value):
+        """
+        表示赋值语句的抽象语法树节点。
+
+        :param target: 赋值的目标（如变量名或属性）。
+        :param value: 被赋的值。
+        """
+        self.target = target
+        self.value = value
+
+    def __str__(self):
+        return f"Let(target={self.target}, value={self.value})"
 class Assign:
     def __init__(self, target, value):
         """

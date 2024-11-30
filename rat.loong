@@ -7,13 +7,15 @@ end
 
 # 创建有理数的函数
 func make_rat(n, d):
-    g = gcd(n, d);         # 计算 n 和 d 的 GCD
-    num = n // g;           # 计算简化后的分子
-    denom = d // g;         # 计算简化后的分母
+    let g = gcd(n, d);         # 计算 n 和 d 的 GCD
+    let num = n // g;          # 计算简化后的分子
+    let denom = d // g;        # 计算简化后的分母
+    
+    # 有理数加法
     func add_rats(a, b):
         # 计算新的分子和分母
-        new_num = a.num * b.denom + b.num * a.denom;
-        new_denom = a.denom * b.denom;
+        let new_num = a.num * b.denom + b.num * a.denom;
+        let new_denom = a.denom * b.denom;
 
         # 返回新的有理数
         make_rat(new_num, new_denom)
@@ -26,6 +28,6 @@ func make_rat(n, d):
 end
 
 # 示例调用
-r1 = make_rat(3, 4);      # 创建有理数 3/4
-r2 = make_rat(2, 3);      # 创建有理数 2/3
+let r1 = make_rat(3, 4);      # 创建有理数 3/4
+let r2 = make_rat(2, 3);      # 创建有理数 2/3
 r1 + r2

@@ -2,12 +2,13 @@ from sly import Lexer
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE, INT_DIV }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, LET, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE, INT_DIV }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
 
     FUNC = r'func'
     END = r'end'
+    LET = r'let'
     AND = r'and'
     OR = r'or'
     XOR = r'xor'
