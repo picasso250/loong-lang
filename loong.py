@@ -43,8 +43,83 @@ class VirtualMachine:
                 raise TypeError("Dictionaries cannot be added directly unless they implement __add__")
         else:
             raise TypeError("Unsupported operand type(s) for +")
-
         return result
+    def sub_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left - right
+        elif isinstance(left, dict):
+            if '__sub__' in left:
+                result = self.handle_function_call(left['__sub__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be subtracted directly unless they implement __sub__")
+        else:
+            raise TypeError("Unsupported operand type(s) for -")
+        return result
+
+    def mul_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left * right
+        elif isinstance(left, str):
+            result = left * right
+        elif isinstance(left, list):
+            result = left * right
+        elif isinstance(left, dict):
+            if '__mul__' in left:
+                result = self.handle_function_call(left['__mul__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be added directly unless they implement __mul__")
+        else:
+            raise TypeError("Unsupported operand type(s) for *")
+        return result
+
+    def div_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left / right
+        elif isinstance(left, dict):
+            if '__div__' in left:
+                result = self.handle_function_call(left['__div__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be divided directly unless they implement __div__")
+        else:
+            raise TypeError("Unsupported operand type(s) for /")
+        return result
+
+    def floordiv_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left // right
+        elif isinstance(left, dict):
+            if '__floordiv__' in left:
+                result = self.handle_function_call(left['__floordiv__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be floor divided directly unless they implement __floordiv__")
+        else:
+            raise TypeError("Unsupported operand type(s) for //")
+        return result
+
+    def pow_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left ** right
+        elif isinstance(left, dict):
+            if '__pow__' in left:
+                result = self.handle_function_call(left['__pow__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be powered directly unless they implement __pow__")
+        else:
+            raise TypeError("Unsupported operand type(s) for **")
+        return result
+
+    def mod_operator(self, left, right, env):
+        if isinstance(left, (int, float)):
+            result = left % right
+        elif isinstance(left, dict):
+            if '__mod__' in left:
+                result = self.handle_function_call(left['__mod__'], [left, right], env)
+            else:
+                raise TypeError("Dictionaries cannot be modulo divided directly unless they implement __mod__")
+        else:
+            raise TypeError("Unsupported operand type(s) for %")
+        return result
+
     def handle_function_call(self, func_def, arg_values, env):
         local_env = Env(parent=func_def.env)
         for i in range(len(func_def.param_list)):
@@ -75,15 +150,15 @@ class VirtualMachine:
             if node.operator == '+':
                 result = self.add_operator(left, right, env)
             elif node.operator == '-':
-                result = left - right
+                result = self.sub_operator(left, right, env)
             elif node.operator == '*':
-                result = left * right
+                result = self.mul_operator(left, right, env)
             elif node.operator == '/':
-                result = left / right
+                result = self.div_operator(left, right, env)
             elif node.operator == '//':
-                result = left // right
+                result = self.floordiv_operator(left, right, env)
             elif node.operator == '%':
-                result = left % right
+                result = self.mod_operator(left, right, env)
             elif node.operator == '>':
                 result = left > right
             elif node.operator == '<':
@@ -97,6 +172,7 @@ class VirtualMachine:
             elif node.operator == '==':
                 result = left == right
             return result
+
         elif isinstance(node, LogicOp):
             left = self.eval(node.left, env)
             if node.operator == 'and':
