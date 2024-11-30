@@ -133,7 +133,7 @@ class FuncDef:
         self.statements = statements
 
     def __repr__(self):
-        return f"FuncDef(\n\tname={self.name}, \n\tparam_list={self.param_list}, \n\tstatements={self.statements})"
+        return f"FuncDef(\n\tname={self.name}, \n\tparam_list={self.param_list}, \n\tstatements=...\n)"
 
 
 class ArrayAccess:

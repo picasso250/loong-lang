@@ -3,7 +3,7 @@ from sly import Lexer
 # 词法分析器
 class LoongLexer(Lexer):
     tokens = {
-        NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, LET, FUNC, END, AND, OR, XOR, NOT, INT_DIV,
+        NAME, NUMBER, STRING, EQUALS, GE, LE, COMMA, LET, FUNC, END, AND, OR, XOR, NOT, INT_DIV,
         ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, AND_ASSIGN, OR_ASSIGN, XOR_ASSIGN, SHR_ASSIGN, SHL_ASSIGN, INT_DIV_ASSIGN, POW_ASSIGN,
         LSHIFT, RSHIFT
     }
@@ -20,7 +20,6 @@ class LoongLexer(Lexer):
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
-    ASSIGN = '='
     GE = '>='
     LE = '<='
     INT_DIV = '//'

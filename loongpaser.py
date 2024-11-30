@@ -48,13 +48,13 @@ class LoongParser(Parser):
         return node
     
     # 语句
-    @_('LET NAME ASSIGN expr')
+    @_('LET NAME "=" expr')
     def statement(self, p):
         node = Let(p.NAME, p.expr)
         node.index = p.index
         node.end = p.end
         return node
-    @_('unary_exp ASSIGN expr')
+    @_('unary_exp "=" expr')
     def statement(self, p):
         node = Assign(p.unary_exp, p.expr)
         node.index = p.index
