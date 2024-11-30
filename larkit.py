@@ -9,10 +9,10 @@ parser = Lark(grammar, start='start', parser='lalr')
 
 # Sample input to test the grammar
 sample_input = """
-LET x = 5;
-FUNC foo(x, y): 
-  LET z = x + y;
-  END
+let x = 5;
+fun foo(x, y): 
+  let z = x + y;
+end
 """
 
 # Parsing the input

@@ -1,59 +1,80 @@
 start: statements
 
-statements: [statement]
+statements: statement (statement)*
+
 statement: "let" NAME "=" expr ";"
          | unary_exp "=" expr ";"
-         | "fun" NAME "(" (NAME ("," NAME)*)? ")" ":" statements "END"
+         | "fun" NAME "(" (NAME ("," NAME)*)? ")" ":" statements "end"
          | expr ";"
 
-expr: "[" "]"
-    | "[" arg_list "]"
-    | "{" dict_entries "}"
-    | "{" "}"
-    | NAME ":" expr
-    | expr "+" expr
-    | expr "-" expr
-    | expr "*" expr
-    | expr "/" expr
-    | expr "%" expr
-    | expr "==" expr
-    | expr "//" expr
-    | expr ">" expr
-    | expr "<" expr
-    | expr "==" expr
-    | expr ">=" expr
-    | expr "<=" expr
-    | expr "and" expr
-    | expr "or" expr
-    | expr "?" expr ":" expr
-    | unary_exp
-    | postfix_exp
+expr: conditional_exp
 
-dict_entries: dict_entry ("," dict_entry)*
+?conditional_exp: logical_or_exp
+               | logical_or_exp "?" expr ":" conditional_exp
 
-dict_entry: NAME ":" expr
+?logical_or_exp: logical_and_exp
+              | logical_or_exp "or" logical_and_exp
 
-unary_exp: "NOT" expr
+?logical_and_exp: inclusive_or_exp
+               | logical_and_exp "and" inclusive_or_exp
+
+?inclusive_or_exp: exclusive_or_exp
+                | inclusive_or_exp "|" exclusive_or_exp
+
+?exclusive_or_exp: and_exp
+                | exclusive_or_exp "^" and_exp
+
+?and_exp: equality_exp
+       | and_exp "&" equality_exp
+
+?equality_exp: relational_exp
+            | equality_exp "==" relational_exp
+            | equality_exp "!=" relational_exp
+
+?relational_exp: shift_expression
+              | relational_exp "<" shift_expression
+              | relational_exp ">" shift_expression
+              | relational_exp "<=" shift_expression
+              | relational_exp ">=" shift_expression
+
+?shift_expression: additive_exp
+                | shift_expression "<<" additive_exp
+                | shift_expression ">>" additive_exp
+
+?additive_exp: mult_exp
+            | additive_exp "+" mult_exp
+            | additive_exp "-" mult_exp
+
+?mult_exp: cast_exp
+        | mult_exp "*" cast_exp
+        | mult_exp "/" cast_exp
+        | mult_exp "%" cast_exp
+
+?cast_exp: unary_exp
+
+?unary_exp: "NOT" expr
          | "-" unary_exp
          | "+" unary_exp
          | "~" unary_exp
          | postfix_exp
 
-postfix_exp: primary_exp
+?postfix_exp: primary_exp
            | postfix_exp "(" arg_list ")"
            | postfix_exp "(" ")"
            | postfix_exp "[" expr "]"
            | postfix_exp "." NAME
 
-primary_exp: "(" expr ")"
+?primary_exp: "(" expr ")"
            | STRING
            | NAME
            | const
 
 arg_list: expr ("," expr)*
 
-const: NUMBER
+?const: NUMBER
 
 NAME: /[a-zA-Z_][a-zA-Z_0-9]*/
 %import common.ESCAPED_STRING   -> STRING
 %import common.SIGNED_NUMBER    -> NUMBER
+%import common.WS
+%ignore WS
