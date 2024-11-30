@@ -12,6 +12,7 @@ def set_node_attrs(node, p):
 
 # 语法分析器
 class LoongParser(Parser):
+    debugfile = 'parser.out'
     tokens = LoongLexer.tokens
 
     precedence = (
