@@ -227,7 +227,7 @@ class VirtualMachine:
             node.env = env
             env.set(node.name, node)
         elif isinstance(node, FuncCall):
-            func_def = self.eval(node.func, env)
+            func_def = self.eval(node.fun, env)
             arg_values = [self.eval(arg, env) for arg in node.args]
             return self.handle_function_call(func_def, arg_values, env)
         elif isinstance(node, ArrayAccess):

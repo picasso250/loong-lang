@@ -6,7 +6,7 @@ class LoongLexer(Lexer):
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
 
-    FUNC = r'func'
+    FUNC = r'fun'
     END = r'end'
     LET = r'let'
     AND = r'and'

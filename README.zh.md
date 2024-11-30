@@ -50,7 +50,7 @@ a > 10 ? "Yes" : "No"
 #### 函数定义
 
 ```
-func foo(a, b): a >= b end
+fun foo(a, b): a >= b end
 ```
 
 #### 函数调用
@@ -64,7 +64,7 @@ foo(a, b)
 #### 参数列表
 
 ```
-func foo(a, b, c): a + b + c end
+fun foo(a, b, c): a + b + c end
 ```
 
 #### 实参列表
@@ -87,7 +87,7 @@ c = "Hello, " + "world!"
 result = (a + b > 12 ? "Yes" : "No") + ", " + c
 
 # 函数定义
-func sum(x, y):
+fun sum(x, y):
     x + y
 end
 

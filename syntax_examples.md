@@ -18,7 +18,7 @@ result = (a + b > 12 ? "Yes" : "No") + ", " + c
 
 ## 函数定义
 ```plaintext
-func sum(x, y):
+fun sum(x, y):
     x + y
 end
 ```

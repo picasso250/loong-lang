@@ -106,18 +106,18 @@ class IfExpr:
 
 
 class FuncCall:
-    def __init__(self, func, args: list):
+    def __init__(self, fun, args: list):
         """
         表示函数调用的抽象语法树节点。
 
-        :param func: 被调用的函数或表达式。
+        :param fun: 被调用的函数或表达式。
         :param args: 参数列表。
         """
-        self.func = func
+        self.fun = fun
         self.args = args
 
     def __str__(self):
-        return f"FuncCall(func={self.func}, args={self.args})"
+        return f"FuncCall(fun={self.fun}, args={self.args})"
 
 
 class FuncDef:
