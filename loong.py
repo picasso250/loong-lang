@@ -7,6 +7,8 @@ from lark import Lark, Transformer, v_args
 from lark.lexer import Token
 from lark.tree import Tree
 
+from pretty import pretty_var
+
 # Read the grammar from the external EBNF file
 with open('grammar.ebnf', 'r', encoding='utf-8') as f:
     grammar = f.read()
@@ -223,6 +225,8 @@ class VirtualMachine:
                     result = self.mul_operator(left, right, env)
                 elif operator == '/':
                     result = self.div_operator(left, right, env)
+                elif operator == '//':
+                    result = self.floordiv_operator(left, right, env)
                 elif operator == '%':
                     result = self.mod_operator(left, right, env)
                 return result
@@ -365,7 +369,7 @@ def main():
         if args.debug:
             print(colored(ast.pretty(), 'grey'))
         result = vm.eval(ast)
-        print(result)
+        print(pretty_var(result))
     else:
         # Interactive mode if no filename is provided
         while True:
@@ -379,7 +383,7 @@ def main():
                 if args.debug:
                     print(colored(ast.pretty(), 'grey'))
                 result = vm.eval(ast)
-                print(result)
+                print(pretty_var(result))
                 break
 
 if __name__ == '__main__':

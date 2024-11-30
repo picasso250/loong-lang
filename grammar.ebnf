@@ -1,8 +1,10 @@
 %import common.ESCAPED_STRING   -> STRING
 %import common.SIGNED_NUMBER    -> NUMBER
-%import common.CNAME -> NAME
+%import common.CNAME            -> NAME
 %import common.WS
 %ignore WS
+
+%ignore /#.*\n/  // Single-line comments (starting with # and continuing to the end of the line)
 
 ?start: statements
 
@@ -67,6 +69,7 @@ list: "[" [expr ("," expr)*] "]"
 ?mult_exp: cast_exp
         | mult_exp MUL cast_exp
         | mult_exp DIV cast_exp
+        | mult_exp IDIV cast_exp
         | mult_exp MOD cast_exp
 
 ?cast_exp: unary_exp
@@ -101,6 +104,7 @@ ADD: "+"
 SUB: "-"
 MUL: "*"
 DIV: "/"
+IDIV: "//"
 MOD: "%"
 EQ: "=="
 NE: "!="
