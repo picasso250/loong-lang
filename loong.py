@@ -43,28 +43,32 @@ class VirtualMachine:
         elif isinstance(node, BinOp):
             left = self.eval(node.left, env)
             right = self.eval(node.right, env)
+            
             if node.operator == '+':
-                return left + right
+                result = left + right
             elif node.operator == '-':
-                return left - right
+                result = left - right
             elif node.operator == '*':
-                return left * right
+                result = left * right
             elif node.operator == '/':
-                return left / right
+                result = left / right
             elif node.operator == '%':
-                return left % right
+                result = left % right
             elif node.operator == '>':
-                return left > right
+                result = left > right
             elif node.operator == '<':
-                return left < right
+                result = left < right
             elif node.operator == '>=':
-                return left >= right
+                result = left >= right
             elif node.operator == '<=':
-                return left <= right
+                result = left <= right
             elif node.operator == '!=':
-                return left != right
+                result = left != right
             elif node.operator == '==':
-                return left == right
+                result = left == right
+            
+            print(f"Debug: Result of {left} {node.operator} {right} = {result}")
+            return result
         elif isinstance(node, LogicOp):
             left = self.eval(node.left, env)
             if node.operator == 'and':
@@ -80,6 +84,7 @@ class VirtualMachine:
             value = self.eval(node.value, env)
             target = node.target
             if isinstance(target, Name):
+                print("set",target.name,"=",value)
                 env.set(target.name, value)
             elif isinstance(target, ArrayAccess):
                 array = self.eval(target.array, env)
@@ -118,7 +123,7 @@ class VirtualMachine:
             return array[index]
         elif isinstance(node, PropAccess):
             obj = self.eval(node.obj, env)
-            return obj[node.prop]
+            return obj[node.property_name]
         elif isinstance(node, list):
             return [self.eval(item, env) for item in node.items]
         elif isinstance(node, dict):

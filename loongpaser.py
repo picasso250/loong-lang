@@ -154,15 +154,11 @@ class LoongParser(Parser):
     @_('NAME')
     def param_list(self, p):
         node = [p.NAME]
-        node.index = p.index
-        node.end = p.end
         return node
 
     @_('param_list COMMA NAME')
     def param_list(self, p):
         node = p.param_list + [p.NAME]
-        node.index = p.index
-        node.end = p.end
         return node
 
     @_('unary_exp')
@@ -279,15 +275,11 @@ class LoongParser(Parser):
     @_('expr')
     def arg_list(self, p):
         node = [p.expr]
-        node.index = p.index
-        node.end = p.end
         return node
 
     @_('arg_list COMMA expr')
     def arg_list(self, p):
         node = p.arg_list + [p.expr]
-        node.index = p.index
-        node.end = p.end
         return node
 
     # 数字
