@@ -52,6 +52,8 @@ class VirtualMachine:
                 result = left * right
             elif node.operator == '/':
                 result = left / right
+            elif node.operator == '//':
+                result = left // right
             elif node.operator == '%':
                 result = left % right
             elif node.operator == '>':
@@ -114,6 +116,7 @@ class VirtualMachine:
                 result = None
                 for stmt in func_def.statements:
                     result = self.eval(stmt, local_env)
+                print(node.func.name if isinstance(node.func, Name) else "","return",result)
                 return result
         elif isinstance(node, ArrayAccess):
             array = self.eval(node.array, env)

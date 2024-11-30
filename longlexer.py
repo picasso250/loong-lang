@@ -1,8 +1,8 @@
-from sly import Lexer, Parser
+from sly import Lexer
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE }
+    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE, INT_DIV }
     ignore = ' \t'
     literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
 
@@ -20,6 +20,7 @@ class LoongLexer(Lexer):
     ASSIGN = '='
     GE = '>='
     LE = '<='
+    INT_DIV = '//'
     COMMA = r','
 
     @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')

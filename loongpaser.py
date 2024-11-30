@@ -1,4 +1,4 @@
-from sly import Lexer, Parser
+from sly import Parser
 from longlexer import LoongLexer
 from longast import *
 
@@ -122,6 +122,7 @@ class LoongParser(Parser):
        'expr "*" expr',
        'expr "/" expr',
        'expr "%" expr',
+       'expr INT_DIV expr',
        'expr ">" expr',
        'expr "<" expr',
        'expr EQUALS expr',
