@@ -21,7 +21,7 @@ class Statements:
         self.statements = statements
 
     def __repr__(self):
-        return f"Statements(statements={self.statements})"
+        return f"Statements({self.statements})"
 class BinOp:
     def __init__(self, operator: str, left, right):
         """
