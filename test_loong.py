@@ -53,14 +53,14 @@ def test_loong():
             ast = parser.parse(lexer.tokenize(test["input"]))
             result = vm.eval(ast)
             print(colored(test["input"], 'grey'), "==>", colored(result, 'grey'))
-            assert result == test["expected"], f"Test case {i+1} {test['input']} failed: expected {test['expected']}, got {result}"
+            assert result == test["expected"], f"{test['input']} failed: expected {test['expected']}, got {result}"
 
             # 如果有注释，打印注释
             if test["comment"]:
                 print(colored(f"Comment: {test['comment']}", 'blue'))
 
         except Exception as e:
-            print(colored(f"Test case {i+1} failed with exception: {e}", 'red'))
+            print(colored(f"Test case {i+1} failed: {e}", 'red'))
             print(colored(f"Input: {test['input']}", 'red'))
             exit(-1)
 

@@ -11,6 +11,8 @@ class Assign:
 
     def __repr__(self):
         return f"Assign(target={self.target}, value={self.value})"
+
+
 class Statements:
     def __init__(self, statements: list):
         """
@@ -22,6 +24,8 @@ class Statements:
 
     def __repr__(self):
         return f"Statements({self.statements})"
+
+
 class BinOp:
     def __init__(self, operator: str, left, right):
         """
@@ -37,6 +41,8 @@ class BinOp:
 
     def __repr__(self):
         return f"BinOp(operator={self.operator}, left={self.left}, right={self.right})"
+
+
 class UnaryOp:
     def __init__(self, operator: str, operand):
         """
@@ -50,6 +56,8 @@ class UnaryOp:
 
     def __repr__(self):
         return f"UnaryOp(operator={self.operator}, operand={self.operand})"
+
+
 class LogicOp:
     def __init__(self, operator: str, left, right):
         """
@@ -65,6 +73,8 @@ class LogicOp:
 
     def __repr__(self):
         return f"LogicOp(operator={self.operator}, left={self.left}, right={self.right})"
+
+
 class IfExpr:
     def __init__(self, condition, true_expr, false_expr):
         """
@@ -80,6 +90,8 @@ class IfExpr:
 
     def __repr__(self):
         return f"IfExpr(condition={self.condition}, true_expr={self.true_expr}, false_expr={self.false_expr})"
+
+
 class FuncCall:
     def __init__(self, func, args: list):
         """
@@ -93,6 +105,7 @@ class FuncCall:
 
     def __repr__(self):
         return f"FuncCall(func={self.func}, args={self.args})"
+
 
 class FuncDef:
     def __init__(self, name: str, param_list: list, statements: list):
@@ -109,6 +122,8 @@ class FuncDef:
 
     def __repr__(self):
         return f"FuncDef(name={self.name}, param_list={self.param_list}, statements={self.statements})"
+
+
 class ArrayAccess:
     def __init__(self, array, index):
         """
@@ -122,6 +137,8 @@ class ArrayAccess:
 
     def __repr__(self):
         return f"ArrayAccess(array={self.array}, index={self.index})"
+
+
 class PropAccess:
     def __init__(self, obj, property_name: str):
         """
@@ -135,6 +152,8 @@ class PropAccess:
 
     def __repr__(self):
         return f"PropAccess(obj={self.obj}, property_name={self.property_name})"
+
+
 class Num:
     def __init__(self, value):
         """
@@ -146,6 +165,8 @@ class Num:
 
     def __repr__(self):
         return f"Num(value={self.value})"
+
+
 class Name:
     def __init__(self, name: str):
         """
@@ -157,6 +178,8 @@ class Name:
 
     def __repr__(self):
         return f"Name(name={self.name})"
+
+
 class Str:
     def __init__(self, value: str):
         """
@@ -168,3 +191,29 @@ class Str:
 
     def __repr__(self):
         return f"Str(value={self.value})"
+
+
+class Dict:
+    def __init__(self, elements: dict):
+        """
+        表示字典（映射）的抽象语法树节点。
+
+        :param elements: 字典的键值对。
+        """
+        self.elements = elements
+
+    def __repr__(self):
+        return f"Dict({self.elements})"
+
+
+class Array:
+    def __init__(self, elements: list):
+        """
+        表示数组（列表）的抽象语法树节点。
+
+        :param elements: 数组的元素。
+        """
+        self.elements = elements
+
+    def __repr__(self):
+        return f"Array({self.elements})"

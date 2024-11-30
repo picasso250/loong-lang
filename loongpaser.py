@@ -18,62 +18,103 @@ class LoongParser(Parser):
         ('right', 'UMINUS', 'UADD'),           # Unary minus
     )
 
-    def __init__(self):
-        self.names = {}
-
     # 语句组
     @_('statement ";" statements')
     def statements(self, p):
-        return Statements([p.statement] + p.statements.statements)
+        node = Statements([p.statement] + p.statements.statements)
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('statement_with_end statements')
     def statements(self, p):
-        return Statements([p.statement_with_end] + p.statements.statements)
+        node = Statements([p.statement_with_end] + p.statements.statements)
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('statement')
     def statements(self, p):
-        return Statements([p.statement])
+        node = Statements([p.statement])
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('statement_with_end')
     def statements(self, p):
-        return Statements([p.statement_with_end])
+        node = Statements([p.statement_with_end])
+        node.index = p.index
+        node.end = p.end
+        return node
     
     # 语句
     @_('unary_exp ASSIGN expr')
     def statement(self, p):
-        return Assign(p.unary_exp, p.expr)
+        node = Assign(p.unary_exp, p.expr)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 函数定义语句
     @_('FUNC NAME "(" param_list ")" ":" statements END')
     def statement_with_end(self, p):
-        return FuncDef(p.NAME, p.param_list, p.statements.statements)
+        node = FuncDef(p.NAME, p.param_list, p.statements.statements)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 变量赋值
     @_('expr')
     def statement(self, p):
-        return p.expr
+        node = p.expr
+        node.index = p.index
+        node.end = p.end
+        return node
     
     # 数组语法
     @_('"[" "]"')
     def expr(self, p):
-        return []
+        node = Array([])
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('"[" arg_list "]"')
     def expr(self, p):
-        return p.arg_list
+        node = Array(p.arg_list)
+        node.index = p.index
+        node.end = p.end
+        return node
     
     # 字典创建
     @_('LBRACE dict_entries RBRACE')
     def expr(self, p):
-        return dict(p.dict_entries)
+        node = Dict(dict(p.dict_entries))
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('LBRACE  RBRACE')
     def expr(self, p):
-        return {}
+        node = Dict({})
+        node.index = p.index
+        node.end = p.end
+        return node
+    
     @_('dict_entry')
     def dict_entries(self, p):
-        return [p.dict_entry]
+        node = [p.dict_entry]
+        return node
+    
     @_('dict_entries COMMA dict_entry')
     def dict_entries(self, p):
-        return p.dict_entries + [p.dict_entry]
+        node = p.dict_entries + [p.dict_entry]
+        return node
+    
     @_('NAME ":" expr')
     def dict_entry(self, p):
-        return (p.NAME, p.expr)
+        node = (p.NAME, p.expr)
+        return node
 
     # 运算符
     @_('expr "+" expr',
@@ -87,105 +128,175 @@ class LoongParser(Parser):
        'expr GE expr',
        'expr LE expr')
     def expr(self, p):
-        return BinOp(p[1], p.expr0, p.expr1)
+        node = BinOp(p[1], p.expr0, p.expr1)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('expr AND expr',
        'expr OR expr',
        'expr XOR expr')
     def expr(self, p):
-        return LogicOp(p[1], p.expr0, p.expr1)
+        node = LogicOp(p[1], p.expr0, p.expr1)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 三元运算符
     @_('expr "?" expr ":" expr')
     def expr(self, p):
-        return IfExpr(p.expr0, p.expr1, p.expr2)
+        node = IfExpr(p.expr0, p.expr1, p.expr2)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 参数列表
     @_('NAME')
     def param_list(self, p):
-        return [p.NAME]
+        node = [p.NAME]
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('param_list COMMA NAME')
     def param_list(self, p):
-        return p.param_list + [p.NAME]
+        node = p.param_list + [p.NAME]
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('unary_exp')
     def expr(self, p):
-        return p.unary_exp
+        node = p.unary_exp
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('postfix_exp')
     def unary_exp(self, p):
-        return p.postfix_exp
+        node = p.postfix_exp
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('NOT expr')
     def unary_exp(self, p):
-        return UnaryOp('not', p.unary_exp)
+        node = UnaryOp('not', p.unary_exp)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('"-" unary_exp %prec UMINUS')
     def unary_exp(self, p):
-        return UnaryOp('-', p.unary_exp)
+        node = UnaryOp('-', p.unary_exp)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('"+" unary_exp %prec UADD')
     def unary_exp(self, p):
-        return UnaryOp('+', p.unary_exp)
+        node = UnaryOp('+', p.unary_exp)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('"~" unary_exp')
     def unary_exp(self, p):
-        return UnaryOp('~', p.unary_exp)
+        node = UnaryOp('~', p.unary_exp)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('primary_exp')
     def postfix_exp(self, p):
-        return p.primary_exp
+        node = p.primary_exp
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 函数调用
     @_('postfix_exp "(" arg_list ")"')
     def postfix_exp(self, p):
-        return FuncCall(p.postfix_exp, p.arg_list)
+        node = FuncCall(p.postfix_exp, p.arg_list)
+        node.index = p.index
+        node.end = p.end
+        return node
+
     @_('postfix_exp "(" ")"')
     def postfix_exp(self, p):
-        return FuncCall(p.postfix_exp, [])
+        node = FuncCall(p.postfix_exp, [])
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 数组访问
     @_('postfix_exp "[" expr "]"')
     def postfix_exp(self, p):
-        return ArrayAccess(p.postfix_exp, p.expr)
+        node = ArrayAccess(p.postfix_exp, p.expr)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 属性访问
     @_('postfix_exp "." NAME')
     def postfix_exp(self, p):
-        return PropAccess(p.postfix_exp, p.NAME)
+        node = PropAccess(p.postfix_exp, p.NAME)
+        node.index = p.index
+        node.end = p.end
+        return node
     
     @_('"(" expr ")"')
     def primary_exp(self, p):
-        return p.expr
+        node = p.expr
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 字符串
     @_('STRING')
     def primary_exp(self, p):
-        return Str(p.STRING)
+        node = Str(p.STRING)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 变量名
     @_('NAME')
     def primary_exp(self, p):
-        return Name(p.NAME)
+        node = Name(p.NAME)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('const')
     def primary_exp(self, p):
-        return p.const
+        node = p.const
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 参数列表
     @_('expr')
     def arg_list(self, p):
-        return [p.expr]
+        node = [p.expr]
+        node.index = p.index
+        node.end = p.end
+        return node
 
     @_('arg_list COMMA expr')
     def arg_list(self, p):
-        return p.arg_list + [p.expr]
+        node = p.arg_list + [p.expr]
+        node.index = p.index
+        node.end = p.end
+        return node
 
     # 数字
     @_('NUMBER')
     def const(self, p):
-        return Num(p.NUMBER)
+        node = Num(p.NUMBER)
+        node.index = p.index
+        node.end = p.end
+        return node
 
     def error(self, p):
         if p:
@@ -199,7 +310,7 @@ if __name__ == '__main__':
     parser = LoongParser()
 
     text = '''# 测试
-        {a:1,b:2}
+        a={a:1,b:2}
     '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
