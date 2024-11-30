@@ -66,8 +66,6 @@ class VirtualMachine:
                 result = left != right
             elif node.operator == '==':
                 result = left == right
-            
-            print(f"Debug: Result of {left} {node.operator} {right} = {result}")
             return result
         elif isinstance(node, LogicOp):
             left = self.eval(node.left, env)
@@ -124,10 +122,10 @@ class VirtualMachine:
         elif isinstance(node, PropAccess):
             obj = self.eval(node.obj, env)
             return obj[node.property_name]
-        elif isinstance(node, list):
-            return [self.eval(item, env) for item in node.items]
-        elif isinstance(node, dict):
-            return {self.eval(k, env): self.eval(v, env) for k, v in node.pairs.items()}
+        elif isinstance(node, Array):
+            return [self.eval(item, env) for item in node.elements]
+        elif isinstance(node, Dict):
+            return {k: self.eval(v, env) for k, v in node.elements.items()}
 import argparse
 import sys
 
