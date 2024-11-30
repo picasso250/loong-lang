@@ -7,7 +7,15 @@ statement: "let" NAME "=" expr ";"
          | "fun" NAME "(" (NAME ("," NAME)*)? ")" ":" statements "end"
          | expr ";"
 
-expr: conditional_exp
+expr: "[" "]"
+    | "[" arg_list "]"
+    | "{" dict_entries "}"
+    | "{" "}"
+    | conditional_exp
+
+dict_entries: dict_entry ("," dict_entry)*
+
+dict_entry: NAME ":" expr
 
 ?conditional_exp: logical_or_exp
                | logical_or_exp "?" expr ":" conditional_exp

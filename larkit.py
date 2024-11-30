@@ -12,6 +12,7 @@ sample_input = """
 let x = 5;
 fun foo(x, y): 
   let z = x + y;
+  {a:1,b:2};
 end
 """
 
