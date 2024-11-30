@@ -1,7 +1,5 @@
 import csv
-from loonglexer import LoongLexer
-from loongpaser import LoongParser
-from loong import VirtualMachine,parser,LoongTransformer
+from loong import VirtualMachine, parser
 from colorama import init, Fore, Style
 from termcolor import colored
 
@@ -16,6 +14,9 @@ def parse_test_cases(file_path):
             for line_number, row in enumerate(reader, start=2):  # start=2 to account for the header
                 if len(row) == 0:
                     continue
+                if len(row)==1 and row[0] == '-':
+                    test_cases.append({"input": '-', "comment": "clear machine"})
+                    continue
                 if len(row) < 2:
                     print(colored(f"Malformed row in test cases file at line {line_number}: {row}", 'red'))
                     continue
@@ -23,6 +24,10 @@ def parse_test_cases(file_path):
                 code = row[0].strip()
                 expected_str = row[1].strip()
                 comment = row[2].strip() if len(row) > 2 else ""
+
+                if code == '-':
+                    test_cases.append({"input": code, "comment": comment})
+                    continue
 
                 try:
                     expected = eval(expected_str)  # 解析期望结果字符串为Python对象
@@ -48,15 +53,19 @@ def test_loong():
 
     for i, test in enumerate(test_cases):
         try:
-            tree = parser.parse(test["input"])
-            ast = LoongTransformer().transform(tree)
+            # 如果有注释，打印注释
+            if test["comment"]:
+                print(colored(f"## {test['comment']}", 'blue'))
+
+            if test["input"] == '-':
+                vm = VirtualMachine()
+                print(colored("="*len(test["comment"])*3, 'cyan'))
+                continue
+
+            ast = parser.parse(test["input"])
             result = vm.eval(ast)
             print(colored(test["input"], 'grey'), "==>", colored(result, 'grey'))
             assert result == test["expected"], f"{test['input']} failed: expected {test['expected']}, got {result}"
-
-            # 如果有注释，打印注释
-            if test["comment"]:
-                print(colored(f"Comment: {test['comment']}", 'blue'))
 
         except Exception as e:
             print(colored(f"Test case {i+1} failed: {e}", 'red'))

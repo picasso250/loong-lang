@@ -1,89 +1,11 @@
 import argparse
-from loonglexer import LoongLexer
-from loongpaser import LoongParser
 from colorama import init
 from termcolor import colored
 from loongast import *
 
 from lark import Lark, Transformer, v_args
-
-from lark import Transformer
-from loongast import *
-
-class LoongTransformer(Transformer):
-    
-    # Statements
-    def statements(self, items):
-        return Statements(items)
-
-    # Let statement
-    def let_stmt(self, items):
-        target, value = items
-        return Let(target, value)
-
-    # Assign statement
-    def assign_stmt(self, items):
-        target, value = items
-        return Assign(target, value)
-
-    # Function Definition
-    def func_stmt(self, items):
-        name, params, body = items
-        return FuncDef(name, params, body)
-    params=list
-    # Expression (conditional, binop, etc.)
-    def expr(self, items):
-        # Here you need to distinguish between different kinds of expressions
-        if isinstance(items[0], str):  # Simple name or constant
-            return Name(items[0])
-        return items[0]  # Otherwise return the first item, it could be a binop or func call
-
-    # Binary Operation (binops)
-    def binop(self, items):
-        left, operator, right = items
-        return BinOp(operator, left, right)
-
-    # Unary Operation
-    def unaryop(self, items):
-        operator, operand = items
-        return UnaryOp(operator, operand)
-
-    # Function Call
-    def func_call(self, items):
-        fun, args = items[0], items[1:]
-        return FuncCall(fun, args)
-
-    # Conditional Expressions (ternary operator)
-    def conditional_exp(self, items):
-        condition, true_expr, false_expr = items
-        return IfExpr(condition, true_expr, false_expr)
-
-    # Dict
-    def dict(self, items):
-        print(items)
-        elements = {key: value for key, value in items}
-        return Dict(elements)
-
-    # Num (numbers)
-    def NUMBER(self, items):
-        return Num(items[0])
-
-    # Name (variable name)
-    def NAME(self, items):
-        return Name(items[0])
-
-    # Array (array initialization)
-    def array(self, items):
-        return Array(items)
-
-    # String
-    def string(self, items):
-        return Str(items[0])
-
-    # # Default for other expressions or statements
-    # def __default__(self, data, children_lists, meta):
-    #     return data[0]  # In case of unhandled rules, return the first item
-
+from lark.lexer import Token
+from lark.tree import Tree
 
 # Read the grammar from the external EBNF file
 with open('grammar.ebnf', 'r', encoding='utf-8') as f:
@@ -100,21 +22,13 @@ class Env:
     def set(self, name, value):
         self.variables[name] = value
 
-    def lookup(self, name, default=None):
+    def lookup(self, name):
         if name in self.variables:
-            return self.variables[name]
+            return True, self.variables[name]
         elif self.parent:
-            return self.parent.lookup(name, default)
+            return self.parent.lookup(name)
         else:
-            return default
-
-    def has(self, name):
-        if name in self.variables:
-            return True
-        elif self.parent:
-            return self.parent.has(name)
-        else:
-            return False
+            return False, None
 
 # Virtual Machine
 class VirtualMachine:
@@ -216,11 +130,11 @@ class VirtualMachine:
 
     def handle_function_call(self, func_def, arg_values, env):
         local_env = Env(parent=func_def.env)
-        for i in range(len(func_def.param_list)):
-            local_env.set(func_def.param_list[i], arg_values[i])
+        for i in range(len(func_def.params.children)):
+            local_env.set(func_def.params.children[i].value, arg_values[i])
 
         result = None
-        for stmt in func_def.statements:
+        for stmt in func_def.statements.children:
             result = self.eval(stmt, local_env)
         print("return", result)
         return result
@@ -231,128 +145,222 @@ class VirtualMachine:
         if node is None:
             return None
 
-        if isinstance(node, Num):
-            return node.value
-        elif isinstance(node, Str):
-            return node.value
-        elif isinstance(node, Name):
-            return env.lookup(node.name, 0)
-        elif isinstance(node, BinOp):
-            left = self.eval(node.left, env)
-            right = self.eval(node.right, env)
+        if isinstance(node, Tree):
+            if node.data == 'statements':
+                result = None
+                for statement in node.children:
+                    result = self.eval(statement, env)
+                return result
+            elif node.data== 'let_stmt':
+                value = self.eval(node.children[1], env)
+                target = node.children[0].value
+                exists,_ = env.lookup(target)
+                if exists:
+                    raise Exception(f"Variable '{target}' is already defined")
+                print("let", target, "=", value)
+                env.set(target, value)
+
+            elif node.data== 'assign_stmt':
+                value = self.eval(node.children[1], env)
+                target = node.children[0]
+                if isinstance(target, Token): # name
+                    exists,_ = env.lookup(target.value)
+                    if not exists:
+                        raise Exception(f"Variable '{target.value}' is not defined")
+                    print("set", target.value, "=", value)
+                    env.set(target.value, value)
+                elif isinstance(target, Tree):
+                    if target.data== 'array_access':
+                        array = self.eval(target.children[0], env)
+                        index = self.eval(target.children[1], env)
+                        array[index] = value
+                    elif target.data== 'prop_access':
+                        obj = self.eval(target.children[0], env)
+                        obj[target.children[1].value] = value
+
+
+            elif node.data== 'func_def':
+                env.set(node.children[0].value, FuncDef(node.children[1], node.children[2], env))
+            elif node.data== 'func_call':
+                func_def = self.eval(node.children[0], env)
+                arg_names = node.children[1].children
+                arg_values = [self.eval(arg, env) for arg in arg_names]
+                return self.handle_function_call(func_def, arg_values, env)
+            elif node.data== 'array_access':
+                array = self.eval(node.children[0], env)
+                index = self.eval(node.children[1], env)
+                return array[index]
+            elif node.data== 'prop_access':
+                obj = self.eval(node.children[0], env)
+                return obj[node.children[1].value]
+            elif node.data== 'list':
+                return [self.eval(item, env) for item in node.children]
+            elif node.data== 'dict':
+                d = {pair.children[0].value: self.eval(pair.children[1], env) for pair in node.children}
+                return d
             
-            if node.operator == '+':
-                result = self.add_operator(left, right, env)
-            elif node.operator == '-':
-                result = self.sub_operator(left, right, env)
-            elif node.operator == '*':
-                result = self.mul_operator(left, right, env)
-            elif node.operator == '/':
-                result = self.div_operator(left, right, env)
-            elif node.operator == '//':
-                result = self.floordiv_operator(left, right, env)
-            elif node.operator == '%':
-                result = self.mod_operator(left, right, env)
-            elif node.operator == '>':
-                result = left > right
-            elif node.operator == '<':
-                result = left < right
-            elif node.operator == '>=':
-                result = left >= right
-            elif node.operator == '<=':
-                result = left <= right
-            elif node.operator == '!=':
-                result = left != right
-            elif node.operator == '==':
-                result = left == right
-            return result
+            elif node.data== 'conditional_exp':
+                cond = self.eval(node.children[0], env)
+                return self.eval(node.children[1], env) if cond else self.eval(node.children[2], env)
+            
+            elif node.data == 'additive_exp':  # 加法表达式
+                left = self.eval(node.children[0], env)  # 左操作数
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)  # 右操作数
+                if operator == '+':
+                    result = self.add_operator(left, right, env)
+                elif operator == '-':
+                    result = self.sub_operator(left, right, env)
+                return result
+            elif node.data == 'mult_exp':  # 乘法表达式
+                left = self.eval(node.children[0], env)
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)
+                if operator == '*':
+                    result = self.mul_operator(left, right, env)
+                elif operator == '/':
+                    result = self.div_operator(left, right, env)
+                elif operator == '%':
+                    result = self.mod_operator(left, right, env)
+                return result
+            elif node.data == 'bitwise_exp':  # 位运算表达式
+                left = self.eval(node.children[0], env)
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)
+                if operator == '&':
+                    result = left & right
+                elif operator == '|':
+                    result = left | right
+                elif operator == '^':
+                    result = left ^ right
+                return result
+            elif node.data == 'equality_exp':  # 等式表达式
+                left = self.eval(node.children[0], env)
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)
+                if operator == '==':
+                    result = left == right
+                elif operator == '!=':
+                    result = left != right
+                return result
+            elif node.data == 'relational_exp':  # 关系表达式
+                left = self.eval(node.children[0], env)
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)
+                if operator == '<':
+                    result = left < right
+                elif operator == '>':
+                    result = left > right
+                elif operator == '<=':
+                    result = left <= right
+                elif operator == '>=':
+                    result = left >= right
+                return result
+            elif node.data == 'shift_expression':  # 移位表达式
+                left = self.eval(node.children[0], env)
+                operator = node.children[1].value  # 操作符在第二个子节点
+                right = self.eval(node.children[2], env)
+                if operator == '<<':
+                    result = left << right
+                elif operator == '>>':
+                    result = left >> right
+                return result
+            elif node.data == 'logical_or_exp':  # 逻辑或表达式
+                left = self.eval(node.children[0], env)
+                if left:
+                    return left
+                return self.eval(node.children[2], env)
+            elif node.data == 'logical_and_exp':  # 逻辑与表达式
+                left = self.eval(node.children[0], env)
+                if not left:
+                    return left
+                return self.eval(node.children[2], env)
+            elif node.data == 'unary_exp':  # 一元运算符表达式
+                operator = node.children[0].value  # 操作符在第一个子节点
+                operand = self.eval(node.children[1], env)  # 操作数在第二个子节点
+                if operator == 'not':
+                    return not operand
+                elif operator == '-':
+                    return -operand
+                elif operator == '+':
+                    return +operand
+                elif operator == '~':
+                    return ~operand
+                return operand
+            elif node.data == 'postfix_exp':  # 后缀表达式
+                return self.eval(node.children[0], env)
+            elif node.data == 'primary_exp':  # 基础表达式
+                return self.eval(node.children[0], env)
+            elif node.data == 'func_call':  # 函数调用
+                func = self.eval(node.children[0], env)  # 函数名
+                args = [self.eval(arg, env) for arg in node.children[1].children]  # 函数参数
+                return func(*args)
+            elif node.data == 'array_access':  # 数组访问
+                array = self.eval(node.children[0], env)
+                index = self.eval(node.children[1], env)
+                return array[index]
+            elif node.data == 'prop_access':  # 属性访问
+                obj = self.eval(node.children[0], env)
+                property_name = node.children[1].value  # 属性名在第二个子节点
+                return obj[property_name]
+            elif node.data == 'dict':  # 字典
+                return {self.eval(k, env): self.eval(v, env) for k, v in zip(node.children[0::2], node.children[1::2])}
+            elif node.data == 'list':  # 列表
+                return [self.eval(item, env) for item in node.children]
+            elif node.data == 'let_stmt':  # 变量声明
+                target = node.children[0].value  # 目标变量
+                value = self.eval(node.children[1], env)  # 赋值表达式
+                env.set(target, value)
+                return value
+            elif node.data == 'assign_stmt':  # 变量赋值
+                target = self.eval(node.children[0], env)
+                value = self.eval(node.children[2], env)
+                if isinstance(target, list):
+                    target[node.children[1].value] = value  # 数组访问赋值
+                else:
+                    env.set(target, value)  # 普通赋值
+                return value
+            elif node.data == 'func_stmt':  # 函数定义
+                func_name = node.children[0].value
+                params = [param.value for param in node.children[1].children]
+                body = node.children[2]
+                env.set(func_name, (params, body))
+                return None
+        elif isinstance(node, Token):
+            if node.type == 'NUMBER':
+                if '.' in node.value or 'e' in node.value or 'E' in node.value:
+                    return float(node.value)
+                else:
+                    return int(node.value)
+            elif node.type == 'STRING':
+                return node.value[1:-1]
+            elif node.type == 'NAME':
+                exists,value = env.lookup(node.value)
+                if not exists:
+                    raise NameError(f"Variable '{node.value}' not defined in the environment.")
+                return value
 
-        elif isinstance(node, LogicOp):
-            left = self.eval(node.left, env)
-            if node.operator == 'and':
-                return left and self.eval(node.right, env)
-            elif node.operator == 'or':
-                return left or self.eval(node.right, env)
-        elif isinstance(node, UnaryOp):
-            if node.operator == 'not':
-                return not self.eval(node.operand, env)
-            elif node.operator == '-':
-                return -self.eval(node.operand, env)
-        elif isinstance(node, Let):
-            value = self.eval(node.value, env)
-            target = node.target
-            if env.has(target):
-                raise Exception(f"Variable '{target}' is already defined")
-            print("let", target, "=", value)
-            env.set(target, value)
-
-        elif isinstance(node, Assign):
-            value = self.eval(node.value, env)
-            target = node.target
-            if isinstance(target, Name):
-                if not env.has(target.name):
-                    raise Exception(f"Variable '{target.name}' is not defined")
-                print("set", target.name, "=", value)
-                env.set(target.name, value)
-            elif isinstance(target, ArrayAccess):
-                array = self.eval(target.array, env)
-                index = self.eval(target.index, env)
-                array[index] = value
-            elif isinstance(target, PropAccess):
-                obj = self.eval(target.obj, env)
-                obj[target.prop] = value
-
-        elif isinstance(node, IfExpr):
-            cond = self.eval(node.condition, env)
-            return self.eval(node.true_expr, env) if cond else self.eval(node.false_expr, env)
-        elif isinstance(node, Statements):
-            result = None
-            for statement in node.statements:
-                result = self.eval(statement, env)
-            return result
-        elif isinstance(node, FuncDef):
-            node.env = env
-            env.set(node.name, node)
-        elif isinstance(node, FuncCall):
-            func_def = self.eval(node.fun, env)
-            arg_values = [self.eval(arg, env) for arg in node.args]
-            return self.handle_function_call(func_def, arg_values, env)
-        elif isinstance(node, ArrayAccess):
-            array = self.eval(node.array, env)
-            index = self.eval(node.index, env)
-            return array[index]
-        elif isinstance(node, PropAccess):
-            obj = self.eval(node.obj, env)
-            return obj[node.property_name]
-        elif isinstance(node, Array):
-            return [self.eval(item, env) for item in node.elements]
-        elif isinstance(node, Dict):
-            d = {k: self.eval(v, env) for k, v in node.elements.items()}
-            return d
 
 def main():
     # Set up argparse
-    parser = argparse.ArgumentParser(description="Run LoongVM with optional debugging.")
-    parser.add_argument('filename', nargs='?', help="The filename of the source code to execute.")
-    parser.add_argument('-d', '--debug', action='store_true', help="Enable debug mode for detailed AST output.")
+    argparser = argparse.ArgumentParser(description="Run LoongVM with optional debugging.")
+    argparser.add_argument('filename', nargs='?', help="The filename of the source code to execute.")
+    argparser.add_argument('-d', '--debug', action='store_true', help="Enable debug mode for detailed AST output.")
     
     # Parse command-line arguments
-    args = parser.parse_args()
+    args = argparser.parse_args()
     
     # Initialize components
     init()
-    lexer = LoongLexer()
-    parser = LoongParser()
     vm = VirtualMachine()
     
     if args.filename:
         # Read the file if a filename is provided
         with open(args.filename, 'r', encoding='utf-8') as file:
             code = file.read()
-        toks = lexer.tokenize(code)
-        ast = parser.parse(toks)
+        ast = parser.parse(code)
         if args.debug:
-            print(colored(str(ast), 'grey'))
+            print(colored(ast.pretty(), 'grey'))
         result = vm.eval(ast)
         print(result)
     else:
@@ -360,14 +368,16 @@ def main():
         while True:
             try:
                 text = input('loong > ')
+                # text = '{a:3}'
             except EOFError:
                 break
             if text:
-                ast = parser.parse(lexer.tokenize(text))
+                ast = parser.parse(text)
                 if args.debug:
-                    print(colored(str(ast), 'grey'))
+                    print(colored(ast.pretty(), 'grey'))
                 result = vm.eval(ast)
                 print(result)
+                break
 
 if __name__ == '__main__':
     main()

@@ -10,20 +10,18 @@ statements: (statement)* expr
 
 ?statement: let_stmt
          | assign_stmt
-         | func_stmt
+         | func_def
          | expr ";"
 
 let_stmt: "let" NAME "=" expr ";"
 
 assign_stmt: unary_exp "=" expr ";"
 
-func_stmt: "fun" NAME params ":" statements "end"
+func_def: "fun" NAME params ":" statements "end"
 
 params: "(" (NAME ("," NAME)*)? ")"
 
-?expr: list
-    | dict
-    | conditional_exp
+?expr: conditional_exp
 
 dict: "{" [pair ("," pair)*] "}"
 pair: NAME ":" expr
@@ -75,15 +73,20 @@ list: "[" [expr ("," expr)*] "]"
          | postfix_exp
 
 ?postfix_exp: primary_exp
-           | postfix_exp "(" arg_list ")"
-           | postfix_exp "(" ")"
-           | postfix_exp "[" expr "]"
-           | postfix_exp "." NAME
+           | func_call
+           | array_access
+           | prop_access
+
+func_call: postfix_exp "(" arg_list ")"
+array_access: postfix_exp "[" expr "]"
+prop_access: postfix_exp "." NAME
 
 ?primary_exp: "(" expr ")"
            | STRING
            | NAME
            | const
+           | list
+           | dict
 
 arg_list: [expr ("," expr)*]
 
