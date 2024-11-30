@@ -2,9 +2,13 @@ from sly import Lexer
 
 # 词法分析器
 class LoongLexer(Lexer):
-    tokens = { NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, LET, FUNC, END, AND, OR, XOR, NOT, LBRACE, RBRACE, INT_DIV }
+    tokens = {
+        NAME, NUMBER, STRING, ASSIGN, EQUALS, GE, LE, COMMA, LET, FUNC, END, AND, OR, XOR, NOT, INT_DIV,
+        ADD_ASSIGN, SUB_ASSIGN, MUL_ASSIGN, DIV_ASSIGN, MOD_ASSIGN, AND_ASSIGN, OR_ASSIGN, XOR_ASSIGN, SHR_ASSIGN, SHL_ASSIGN, INT_DIV_ASSIGN, POW_ASSIGN,
+        LSHIFT, RSHIFT
+    }
     ignore = ' \t'
-    literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']' }
+    literals = { '=', '+', '-', '*', '/', '%', '(', ')', '>', '<', '?', ':', ';', '.', ',', '[', ']', '{', '}', '&', '|', '^' }
 
     FUNC = r'fun'
     END = r'end'
@@ -13,8 +17,6 @@ class LoongLexer(Lexer):
     OR = r'or'
     XOR = r'xor'
     NOT = r'not'
-    LBRACE = r'{'
-    RBRACE = r'}'
 
     NAME = r'[a-zA-Z_][a-zA-Z0-9_]*'
     EQUALS = '=='
@@ -23,6 +25,21 @@ class LoongLexer(Lexer):
     LE = '<='
     INT_DIV = '//'
     COMMA = r','
+
+    ADD_ASSIGN = r'\+='
+    SUB_ASSIGN = r'-='
+    MUL_ASSIGN = r'\*='
+    DIV_ASSIGN = r'/='
+    MOD_ASSIGN = r'%='
+    AND_ASSIGN = r'&='
+    OR_ASSIGN = r'\|='
+    XOR_ASSIGN = r'\^='
+    SHR_ASSIGN = r'>>='
+    SHL_ASSIGN = r'<<='
+    INT_DIV_ASSIGN = r'//='
+    POW_ASSIGN = r'\*\*='
+    LSHIFT = r'<<'
+    RSHIFT = r'>>'
 
     @_(r'(\d+\.\d*|\d+)([eE][+-]?\d+)?')
     def NUMBER(self, t):

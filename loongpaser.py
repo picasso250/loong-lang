@@ -1,6 +1,6 @@
 from sly import Parser
-from longlexer import LoongLexer
-from longast import *
+from loonglexer import LoongLexer
+from loongast import *
 
 # 语法分析器
 class LoongParser(Parser):
@@ -93,14 +93,14 @@ class LoongParser(Parser):
         return node
     
     # 字典创建
-    @_('LBRACE dict_entries RBRACE')
+    @_('"{" dict_entries "}"')
     def expr(self, p):
         node = Dict(dict(p.dict_entries))
         node.index = p.index
         node.end = p.end
         return node
     
-    @_('LBRACE  RBRACE')
+    @_('"{"  "}"')
     def expr(self, p):
         node = Dict({})
         node.index = p.index
@@ -313,4 +313,4 @@ if __name__ == '__main__':
     '''
     toks = lexer.tokenize(text)
     ast = parser.parse(toks)
-    print(str(ast))
+    print(ast)

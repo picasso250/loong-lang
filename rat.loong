@@ -20,6 +20,7 @@ fun make_rat(n, d):
         # 返回新的有理数
         make_rat(new_num, new_denom)
     end
+
     {
         num: num,
         denom: denom,

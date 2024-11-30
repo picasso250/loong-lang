@@ -1,9 +1,9 @@
 import argparse
-from longlexer import LoongLexer
+from loonglexer import LoongLexer
 from loongpaser import LoongParser
 from colorama import init
 from termcolor import colored
-from longast import *
+from loongast import *
 
 class Env:
     def __init__(self, parent=None):
