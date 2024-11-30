@@ -130,11 +130,11 @@ class VirtualMachine:
 
     def handle_function_call(self, func_def, arg_values, env):
         local_env = Env(parent=func_def.env)
-        for i in range(len(func_def.params.children)):
-            local_env.set(func_def.params.children[i].value, arg_values[i])
+        for i in range(len(func_def.params)):
+            local_env.set(func_def.params[i].value, arg_values[i])
 
         result = None
-        for stmt in func_def.statements.children:
+        for stmt in func_def.statements:
             result = self.eval(stmt, local_env)
         print("return", result)
         return result
@@ -154,7 +154,7 @@ class VirtualMachine:
             elif node.data== 'let_stmt':
                 value = self.eval(node.children[1], env)
                 target = node.children[0].value
-                exists,_ = env.lookup(target)
+                exists, _ = env.lookup(target)
                 if exists:
                     raise Exception(f"Variable '{target}' is already defined")
                 print("let", target, "=", value)
@@ -178,9 +178,12 @@ class VirtualMachine:
                         obj = self.eval(target.children[0], env)
                         obj[target.children[1].value] = value
 
-
             elif node.data== 'func_def':
-                env.set(node.children[0].value, FuncDef(node.children[1], node.children[2], env))
+                env.set(node.children[0].value, FuncDef(node.children[1].children, node.children[2].children, env))
+            elif node.data== 'func_expr':
+                return FuncDef(node.children[0].children, node.children[1].children, env)
+            elif node.data== 'short_func_expr':
+                return FuncDef([node.children[0]], [node.children[1]], env)
             elif node.data== 'func_call':
                 func_def = self.eval(node.children[0], env)
                 arg_names = node.children[1].children

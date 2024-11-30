@@ -19,9 +19,14 @@ assign_stmt: unary_exp "=" expr ";"
 
 func_def: "fun" NAME params ":" statements "end"
 
-params: "(" (NAME ("," NAME)*)? ")"
+params: "(" [NAME ("," NAME)*] ")"
 
-?expr: conditional_exp
+?expr: func_expr
+
+?func_expr: conditional_exp
+    | "fun" params ":" statements "end"
+    | short_func_expr
+short_func_expr: NAME "=>" expr
 
 dict: "{" [pair ("," pair)*] "}"
 pair: NAME ":" expr

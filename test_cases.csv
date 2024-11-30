@@ -24,8 +24,11 @@ arr[1] * arr[2]                             	6
 let arr = [10, 20, 30]; arr[0] + arr[2]     	40
 let b = [1, 2] + [3, 4]; b[3]               	4
 -                                           	                	属性访问测试
-let obj = {name: "Loong", age: 5}; obj.name 	"Loong"       	
+let obj = {name: "Loong", age: 5}; obj.name 	"Loong"         	
 obj.name = "LoongAI"; obj.name              	"LoongAI"       	
 obj.age                                     	5
-fun getName(o): o.name end getName(obj)    	"LoongAI"
+fun getName(o): o.name end getName(obj)     	"LoongAI"
 obj.height = 15.5; obj.height               	15.5
+-                                           	                	lambda
+let id=x=>x; id(3)                            	3
+let f=fun(a,b):a+b end; f(3,4)               	7

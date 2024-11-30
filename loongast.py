@@ -28,5 +28,5 @@ class FuncDef:
         self.env = env
 
     def __repr__(self):
-        return f"FuncDef(\n\tname={self.name}, \n\tparam_list={self.param_list}, \n\tstatements={self.statements}\n)"
+        return f"FuncDef(\n\tparam_list={self.params}, \n\tstatements={self.statements}\n)"
 
