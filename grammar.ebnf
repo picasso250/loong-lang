@@ -4,7 +4,8 @@
 %import common.WS
 %ignore WS
 
-%ignore /#.*\n/  // Single-line comments (starting with # and continuing to the end of the line)
+%import common.SH_COMMENT
+%ignore SH_COMMENT
 
 ?start: statements
 
