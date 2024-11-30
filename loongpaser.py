@@ -2,6 +2,14 @@ from sly import Parser
 from loonglexer import LoongLexer
 from loongast import *
 
+
+# 定义一个函数来处理公共的设置node属性操作
+def set_node_attrs(node, p):
+    node.index = p.index
+    node.end = p.end
+    return node
+
+
 # 语法分析器
 class LoongParser(Parser):
     tokens = LoongLexer.tokens
@@ -22,105 +30,79 @@ class LoongParser(Parser):
     @_('statement ";" statements')
     def statements(self, p):
         node = Statements([p.statement] + p.statements.statements)
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('statement_with_end statements')
     def statements(self, p):
         node = Statements([p.statement_with_end] + p.statements.statements)
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('statement')
     def statements(self, p):
         node = Statements([p.statement])
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('statement_with_end')
     def statements(self, p):
         node = Statements([p.statement_with_end])
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     # 语句
     @_('LET NAME "=" expr')
     def statement(self, p):
         node = Let(p.NAME, p.expr)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
+
     @_('unary_exp "=" expr')
     def statement(self, p):
         node = Assign(p.unary_exp, p.expr)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 函数定义语句
     @_('FUNC NAME "(" param_list ")" ":" statements END')
     def statement_with_end(self, p):
         node = FuncDef(p.NAME, p.param_list, p.statements.statements)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 变量赋值
     @_('expr')
     def statement(self, p):
         node = p.expr
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     # 数组语法
     @_('"[" "]"')
     def expr(self, p):
         node = Array([])
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('"[" arg_list "]"')
     def expr(self, p):
         node = Array(p.arg_list)
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     # 字典创建
     @_('"{" dict_entries "}"')
     def expr(self, p):
         node = Dict(dict(p.dict_entries))
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('"{"  "}"')
     def expr(self, p):
         node = Dict({})
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('dict_entry')
     def dict_entries(self, p):
-        node = [p.dict_entry]
-        return node
-    
+        return [p.dict_entry]
+
     @_('dict_entries COMMA dict_entry')
     def dict_entries(self, p):
-        node = p.dict_entries + [p.dict_entry]
-        return node
-    
+        return p.dict_entries + [p.dict_entry]
+
     @_('NAME ":" expr')
     def dict_entry(self, p):
-        node = (p.NAME, p.expr)
-        return node
+        return (p.NAME, p.expr)
 
     # 运算符
     @_('expr "+" expr',
@@ -153,149 +135,111 @@ class LoongParser(Parser):
     @_('expr "?" expr ":" expr')
     def expr(self, p):
         node = IfExpr(p.expr0, p.expr1, p.expr2)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 参数列表
     @_('NAME')
     def param_list(self, p):
-        node = [p.NAME]
-        return node
+        return [p.NAME]
 
     @_('param_list COMMA NAME')
     def param_list(self, p):
-        node = p.param_list + [p.NAME]
-        return node
+        return p.param_list + [p.NAME]
 
     @_('unary_exp')
     def expr(self, p):
         node = p.unary_exp
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('postfix_exp')
     def unary_exp(self, p):
         node = p.postfix_exp
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('NOT expr')
     def unary_exp(self, p):
         node = UnaryOp('not', p.unary_exp)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('"-" unary_exp %prec UMINUS')
     def unary_exp(self, p):
         node = UnaryOp('-', p.unary_exp)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('"+" unary_exp %prec UADD')
     def unary_exp(self, p):
         node = UnaryOp('+', p.unary_exp)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('"~" unary_exp')
     def unary_exp(self, p):
         node = UnaryOp('~', p.unary_exp)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('primary_exp')
     def postfix_exp(self, p):
         node = p.primary_exp
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 函数调用
     @_('postfix_exp "(" arg_list ")"')
     def postfix_exp(self, p):
         node = FuncCall(p.postfix_exp, p.arg_list)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('postfix_exp "(" ")"')
     def postfix_exp(self, p):
         node = FuncCall(p.postfix_exp, [])
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 数组访问
     @_('postfix_exp "[" expr "]"')
     def postfix_exp(self, p):
         node = ArrayAccess(p.postfix_exp, p.expr)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 属性访问
     @_('postfix_exp "." NAME')
     def postfix_exp(self, p):
         node = PropAccess(p.postfix_exp, p.NAME)
-        node.index = p.index
-        node.end = p.end
-        return node
-    
+        return set_node_attrs(node, p)
+
     @_('"(" expr ")"')
     def primary_exp(self, p):
         node = p.expr
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 字符串
     @_('STRING')
     def primary_exp(self, p):
         node = Str(p.STRING)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 变量名
     @_('NAME')
     def primary_exp(self, p):
         node = Name(p.NAME)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     @_('const')
     def primary_exp(self, p):
         node = p.const
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     # 参数列表
     @_('expr')
     def arg_list(self, p):
-        node = [p.expr]
-        return node
+        return [p.expr]
 
     @_('arg_list COMMA expr')
     def arg_list(self, p):
-        node = p.arg_list + [p.expr]
-        return node
+        return p.arg_list + [p.expr]
 
     # 数字
     @_('NUMBER')
     def const(self, p):
         node = Num(p.NUMBER)
-        node.index = p.index
-        node.end = p.end
-        return node
+        return set_node_attrs(node, p)
 
     def error(self, p):
         if p:
