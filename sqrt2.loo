@@ -11,5 +11,5 @@ fun abs(x):
 end
 
 # 初始化计算 sqrt(2) 的初始猜测值，并调用 sqrt_newton 函数
-initial_guess = 1.0;
+let initial_guess = 1.0;
 sqrt_newton(2, initial_guess)

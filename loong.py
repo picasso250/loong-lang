@@ -159,7 +159,7 @@ class VirtualMachine:
                 exists, _ = env.lookup(target)
                 if exists:
                     raise Exception(f"Variable '{target}' is already defined")
-                print("let", target, "=", value)
+                # print("let", target, "=", value)
                 env.set(target, value)
             elif node.data == 'let_multi_stmt':
                 expr = node.children[-1]
@@ -398,13 +398,13 @@ def main():
         # Interactive mode if no filename is provided
         while True:
             try:
-                # text = input('loong > ')
-                text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
+                text = input('loong > ')
+                # text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
                 # text = ' [1,2,3] @ (x=>x+1) >? (x=>x%2==0)  @ x=>x*2 '
                 # text = ' [["a",1]] @ {k,v=>k,v} '
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
-                text = 'let [a,b]=[2,3];a+b'
+                # text = 'let [a,b]=[2,3];a+b'
             except EOFError:
                 break
             if text:
@@ -413,7 +413,7 @@ def main():
                     print(colored(ast.pretty(), 'grey'))
                 result = vm.eval(ast)
                 print(pretty_var(result))
-                break
+                # break
 
 if __name__ == '__main__':
     main()
