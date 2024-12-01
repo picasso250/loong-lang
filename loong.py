@@ -138,7 +138,7 @@ class VirtualMachine:
         result = None
         for stmt in func_def.statements:
             result = self.eval(stmt, local_env)
-        print("return", result)
+        # print("return", result)
         return result
     def eval(self, node, env=None):
         if env is None:
@@ -205,9 +205,15 @@ class VirtualMachine:
                 return d
             
             elif node.data== 'map_expr':
-                lst = self.eval(node.children[0], env)
-                lmd = self.eval(node.children[1], env)
-                return [self.handle_function_call(lmd, [x], env) for x in lst]
+                operator = node.children[1].type
+                if operator == 'MAP_AT':
+                    lst = self.eval(node.children[0], env)
+                    lmd = self.eval(node.children[2], env)
+                    return [self.handle_function_call(lmd, [x], env) for x in lst]
+                elif operator == 'FILTER_IF':
+                    lst = self.eval(node.children[0], env)
+                    lmd = self.eval(node.children[2], env)
+                    return [x for x in lst if self.handle_function_call(lmd, [x], env)]
         
             elif node.data== 'conditional_exp':
                 cond = self.eval(node.children[0], env)
@@ -380,7 +386,9 @@ def main():
         while True:
             try:
                 # text = input('loong > ')
-                text = '[1,2,3] @ (x=>x+1) @ x=>x*2'
+                text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
+                # text = ' [1,2,3] @ (x=>x+1) >? (x=>x%2==0)  @ x=>x*2 '
+                # text = ' [["a",1]] @ {k,v=>k,v} '
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
             except EOFError:

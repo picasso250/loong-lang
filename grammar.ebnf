@@ -27,7 +27,8 @@ params: "(" [NAME ("," NAME)*] ")"
 ?expr: map_expr
 
 ?map_expr: func_expr
-    | map_expr "@" func_expr
+    | map_expr MAP_AT "[" func_expr "]"
+    | map_expr FILTER_IF func_expr
 
 ?func_expr: conditional_exp
     | "fun" params ":" statements "end"
@@ -128,3 +129,4 @@ BITWISE_AND: "&"
 BITWISE_OR: "|"
 
 MAP_AT: "@"
+FILTER_IF: ">?"
