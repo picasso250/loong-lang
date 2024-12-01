@@ -161,6 +161,19 @@ class VirtualMachine:
                     raise Exception(f"Variable '{target}' is already defined")
                 print("let", target, "=", value)
                 env.set(target, value)
+            elif node.data == 'let_multi_stmt':
+                expr = node.children[-1]
+                names = node.children[:-1]
+                value = self.eval(expr, env)
+                if not isinstance(value, list):
+                    raise TypeError(f"Expected list, got {type(value).__name__}")
+                if len(names) != len(value):  # 检测数组长度是否匹配
+                    raise ValueError(f"Number of names ({len(names)}) does not match number of values ({len(value)})")
+                for index, name in enumerate(names):
+                    exists, _ = env.lookup(name.value)
+                    if exists:
+                        raise Exception(f"Variable '{name.value}' is already defined")
+                    env.set(name.value, value[index])
 
             elif node.data== 'assign_stmt':
                 value = self.eval(node.children[1], env)
@@ -391,6 +404,7 @@ def main():
                 # text = ' [["a",1]] @ {k,v=>k,v} '
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
+                text = 'let [a,b]=[2,3];a+b'
             except EOFError:
                 break
             if text:

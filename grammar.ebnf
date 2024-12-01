@@ -12,13 +12,17 @@
 statements: (statement)* expr
 
 ?statement: let_stmt
+    | let_multi_stmt
          | assign_stmt
+        //  | assign_multi_stmt
          | func_def
          | expr ";"
 
 let_stmt: "let" NAME "=" expr ";"
+let_multi_stmt: "let" "[" NAME ("," NAME)* "]" "=" expr ";"
 
 assign_stmt: unary_exp "=" expr ";"
+// assign_multi_stmt: "[" unary_exp ("," unary_exp) "]" "=" expr ";"
 
 func_def: "fun" NAME params ":" statements "end"
 
