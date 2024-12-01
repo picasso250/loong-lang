@@ -204,6 +204,11 @@ class VirtualMachine:
                 d = {pair.children[0].value: self.eval(pair.children[1], env) for pair in node.children}
                 return d
             
+            elif node.data== 'map_expr':
+                lst = self.eval(node.children[0], env)
+                lmd = self.eval(node.children[1], env)
+                return [self.handle_function_call(lmd, [x], env) for x in lst]
+        
             elif node.data== 'conditional_exp':
                 cond = self.eval(node.children[0], env)
                 return self.eval(node.children[1], env) if cond else self.eval(node.children[2], env)
@@ -374,8 +379,10 @@ def main():
         # Interactive mode if no filename is provided
         while True:
             try:
-                text = input('loong > ')
-                # text = '{a:3}'
+                # text = input('loong > ')
+                text = '[1,2,3] @ (x=>x+1) @ x=>x*2'
+                # text = 'a=>b=>a+b'
+                # text = 'a@f@g'
             except EOFError:
                 break
             if text:

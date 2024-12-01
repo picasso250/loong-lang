@@ -13,7 +13,7 @@
             ,
             "args": [
                 // "${command:pickArgs}"
-                "rat.loong"
+                // "rat.loong"
             ]
         }
     ]

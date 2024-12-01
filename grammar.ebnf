@@ -24,12 +24,16 @@ func_def: "fun" NAME params ":" statements "end"
 
 params: "(" [NAME ("," NAME)*] ")"
 
-?expr: func_expr
+?expr: map_expr
+
+?map_expr: func_expr
+    | map_expr "@" func_expr
 
 ?func_expr: conditional_exp
     | "fun" params ":" statements "end"
     | short_func_expr
-short_func_expr: NAME "=>" expr
+
+short_func_expr: NAME "=>" expr //"$" // it work for map
 
 dict: "{" [pair ("," pair)*] "}"
 pair: NAME ":" expr
@@ -122,3 +126,5 @@ BITWISE_NOT: "~"
 BITWISE_XOR: "^"
 BITWISE_AND: "&"
 BITWISE_OR: "|"
+
+MAP_AT: "@"
