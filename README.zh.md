@@ -4,14 +4,17 @@
 
 ## 功能
 
-该解释器使用 `sly` 库进行词法和语法分析，支持以下功能：
+该解释器使用 `lark` 库进行词法和语法分析，支持以下功能：
 
 - 基本的算术运算：加法、减法、乘法、除法。
 - 比较运算符：大于、小于、等于、大于等于、小于等于。
+- 逻辑运算符：与、或、非。
+- todo 位运算符：按位与、按位或、按位异或、按位取反、左移、右移。
 - 变量赋值和引用。
 - 支持三元运算符。
 - 支持字符串（双引号括起来）。
-- 支持小数。
+- 支持小数和整数。
+- 支持数组和字典（包括数组访问、字典访问）。
 - 支持函数定义和调用。
 - **语句块**：使用分号分隔多个语句。
 
@@ -20,7 +23,9 @@
 ### 变量赋值
 
 ```
-a = 10
+let a = 10;
+let b = [1, 2, 3];
+let c = { "key1": 10, "key2": 20 };
 ```
 
 ### 算术表达式
@@ -39,10 +44,45 @@ a > b
 a < b
 ```
 
+### 逻辑运算符
+
+```
+a and b
+a or b
+not a
+```
+
+### 位运算符
+
+```
+a & b
+a | b
+a ^ b
+~a
+a << b
+a >> b
+```
+
 ### 条件运算符（三元运算符）
 
 ```
 a > 10 ? "Yes" : "No"
+```
+
+### 数组与字典
+
+#### 数组
+
+```
+let arr = [1, 2, 3];
+arr[0]  # 访问数组第一个元素
+```
+
+#### 字典
+
+```
+let dict = { key1: 10, key2: 20 };
+dict["key1"]  # 访问字典中的值
 ```
 
 ### 函数定义和调用
@@ -73,18 +113,30 @@ fun foo(a, b, c): a + b + c end
 foo(1, 2, 3)
 ```
 
+### 短函数表达式
+
+```
+let f = a => a * 2;
+f(5)  # 返回 10
+```
+
 ## 语法示例
 
 ```
 # 变量赋值
-a = 10
-b = 3.14
+let a = 10;
+let b = 3.14;
 
 # 字符串
-c = "Hello, " + "world!"
+let c = "Hello, " + "world!";
 
 # 条件运算符
-result = (a + b > 12 ? "Yes" : "No") + ", " + c
+let result = (a + b > 12 ? "Yes" : "No") + ", " + c;
+
+# 数组与字典
+let arr = [1, 2, 3];
+let dict = { key1: 10, key2: 20 };
+let val = dict["key1"];
 
 # 函数定义
 fun sum(x, y):
@@ -92,22 +144,26 @@ fun sum(x, y):
 end
 
 # 函数调用
-result = sum(a, b)
+let result = sum(a, b);
+
+# 短函数表达式
+let double = a => a * 2;
+let doubled = double(5);
 
 # 完整示例
-(a + b > 12 ? "Yes" : "No") + ", " + c
+(a + b > 12 ? "Yes" : "No") + ", " + c;
 ```
 
 ## 安装与使用
 
 1. 安装依赖项：
     ```bash
-    pip install sly colorama termcolor
+    pip install lark colorama termcolor
     ```
 
 2. 运行解释器：
-    ```
-     loong.py
+    ```bash
+    python loong.py
     ```
 
 ## 测试
@@ -115,7 +171,7 @@ result = sum(a, b)
 运行测试用例以确保解释器的正确性：
 
 ```bash
- test_loong.py
+ python test_loong.py
 ```
 
 ## 贡献

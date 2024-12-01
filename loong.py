@@ -3,7 +3,7 @@ from colorama import init
 from termcolor import colored
 from loongast import *
 
-from lark import Lark, Transformer, v_args
+from lark import Lark
 from lark.lexer import Token
 from lark.tree import Tree
 
