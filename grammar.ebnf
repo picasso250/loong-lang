@@ -38,7 +38,7 @@ params: "(" [NAME ("," NAME)*] ")"
     | "fun" params ":" statements "end"
     | short_func_expr
 
-short_func_expr: NAME "=>" expr //"$" // it work for map
+short_func_expr: NAME "=>" expr
 
 dict: "{" [pair ("," pair)*] "}"
 pair: NAME ":" expr
