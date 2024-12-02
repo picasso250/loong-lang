@@ -1,18 +1,18 @@
 # 最大公约数（GCD）程序示例
-fun gcd(a, b):
+def gcd(a, b):
     b == 0?
         a:
         gcd(b, a % b)
 end
 
 # 创建有理数的函数
-fun make_rat(n, d):
+def make_rat(n, d):
     let g = gcd(n, d);         # 计算 n 和 d 的 GCD
     let num = n // g;          # 计算简化后的分子
     let denom = d // g;        # 计算简化后的分母
     
     # 有理数加法
-    fun add_rats(a, b):
+    def add_rats(a, b):
         # 计算新的分子和分母
         let new_num = a.num * b.denom + b.num * a.denom;
         let new_denom = a.denom * b.denom;

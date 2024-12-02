@@ -32,7 +32,7 @@ let_multi_stmt: "let" "[" NAME ("," NAME)* "]" "=" expr ";"
 assign_stmt: unary_exp "=" expr ";"
 // assign_multi_stmt: "[" unary_exp ("," unary_exp) "]" "=" expr ";"
 
-func_def: "fun" NAME params ":" statements "end"
+func_def: "def" NAME params ":" statements "end"
 
 params: "(" [NAME ("," NAME)*] ")"
 
@@ -43,7 +43,7 @@ params: "(" [NAME ("," NAME)*] ")"
     | map_expr FILTER_IF func_expr
 
 ?func_expr: conditional_exp
-    | "fun" params ":" statements "end"
+    | "def" params ":" statements "end"
     | short_func_expr
 
 short_func_expr: NAME "=>" expr

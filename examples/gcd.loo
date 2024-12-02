@@ -1,6 +1,6 @@
 # 最大公约数（GCD）程序示例
 
-fun gcd(a, b):
+def gcd(a, b):
     b == 0?
         a:
         gcd(b, a % b)

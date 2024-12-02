@@ -1,12 +1,12 @@
 # 定义一个递归函数来实现牛顿法
-fun sqrt_newton(x, guess):
+def sqrt_newton(x, guess):
     abs(guess * guess - x) < 1e-10 ? 
         guess : 
         sqrt_newton(x, 0.5 * (guess + x / guess))
 end
 
 # 定义一个求绝对值的辅助函数
-fun abs(x):
+def abs(x):
     x < 0 ? -x : x
 end
 
