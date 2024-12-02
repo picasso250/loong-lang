@@ -42,4 +42,4 @@ let 对象 = {名字: "龙", 年龄: 5}; 对象.名字 	"龙"
 对象.年龄                                   	5
 对象.名字 = "龙AI"; 对象.名字               	"龙AI"
 -                                           	import
-import "json"; json.dumps([1])              	"[1]"
+@json; json.dumps([1])              	"[1]"
