@@ -15,7 +15,7 @@ def parse_test_cases(file_path):
                 if len(row) == 0:
                     continue
                 if len(row)==1 and row[0] == '-':
-                    test_cases.append({"input": '-', "comment": "clear machine"})
+                    test_cases.append({"input": '-', "expected": "clear machine"})
                     continue
                 if len(row) < 2:
                     print(colored(f"Malformed row in test cases file at line {line_number}: {row}", 'red'))
@@ -23,10 +23,9 @@ def parse_test_cases(file_path):
 
                 code = row[0].strip()
                 expected_str = row[1].strip()
-                comment = row[2].strip() if len(row) > 2 else ""
 
                 if code == '-':
-                    test_cases.append({"input": code, "comment": comment})
+                    test_cases.append({"input": '-', "expected": expected_str})
                     continue
 
                 try:
@@ -36,7 +35,7 @@ def parse_test_cases(file_path):
                     continue
 
                 # 保存测试用例
-                test_cases.append({"input": code, "expected": expected, "comment": comment})
+                test_cases.append({"input": code, "expected": expected})
 
     except Exception as e:
         print(colored(f"Failed to load test cases file: {e}", 'red'))
@@ -53,13 +52,9 @@ def test_loong():
 
     for i, test in enumerate(test_cases):
         try:
-            # 如果有注释，打印注释
-            if test["comment"]:
-                print(colored(f"## {test['comment']}", 'blue'))
-
             if test["input"] == '-':
                 vm = VirtualMachine()
-                print(colored("="*len(test["comment"])*3, 'cyan'))
+                print(colored(f"### {test['expected']} ###", 'cyan'))
                 continue
 
             ast = parser.parse(test["input"])
