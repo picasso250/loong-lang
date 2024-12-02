@@ -1,3 +1,4 @@
+import builtins
 import argparse,os,types
 from colorama import init
 from termcolor import colored
@@ -156,6 +157,36 @@ class VirtualMachine:
         # print("return", result)
         return result
 
+    def import_module_and_set_env(self, module_name, env):
+        # 检测本地目录是否有 <name>.py 文件，如有 import 之
+        py_file = f"{module_name}.py"
+        if os.path.exists(py_file):
+            spec = importlib.util.spec_from_file_location(module_name, py_file)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            
+            # 遍历模块中的所有名称，并在 env 中设置它们
+            for name in dir(module):
+                if not name.startswith("_"):  # 忽略私有属性
+                    env.set(name, getattr(module, name))
+            
+            return module
+
+        # 检测是否是 python 内部模块的名字，如有 import 之
+        try:
+            module = __import__(module_name)
+            
+            # 遍历模块中的所有名称，并在 env 中设置它们
+            for name in dir(module):
+                if not name.startswith("_"):  # 忽略私有属性
+                    env.set(name, getattr(module, name))
+                    
+            return module
+        except ImportError:
+            pass
+
+        return None
+
     def eval(self, node, env=None):
         if env is None:
             env = self.global_env  # Default to global environment
@@ -170,30 +201,81 @@ class VirtualMachine:
                     result = self.eval(statement, env)
                 return result
             elif node.data == 'import_stmt':
-                # 获取模块名称
-                module_name = self.eval(node.children[0])
-                # 1. 检测本地目录是否有 <name>.loo 文件，如有 process 之
-                loo_file = f"{module_name}.loo"
-                if os.path.exists(loo_file):
-                    self.process_file(loo_file, env)
-                    return None
-                # 2. 检测本地目录是否有 <name>.py 文件，如有 import 之
-                py_file = f"{module_name}.py"
-                if os.path.exists(py_file):
-                    import importlib.util
-                    spec = importlib.util.spec_from_file_location(module_name, py_file)
-                    module = importlib.util.module_from_spec(spec)
-                    spec.loader.exec_module(module)
-                    env.set(module_name, module)
-                    return module
-                # 3. 检测是否是 python 内部模块的名字，如有 import 之
-                try:
-                    module = __import__(module_name)
-                    env.set(module_name, module)
-                    return module
-                except ImportError:
-                    pass
-                return None
+                if node.children[0].value == '_':
+                    # 遍历所有内置名称并设置到 env
+                    for name in dir(builtins):
+                        if not name.startswith("_"):  # 忽略私有名称
+                            # print("load",name)
+                            env.set(name, getattr(builtins, name))
+                    env.set("_", builtins)
+                else:
+
+                    # 获取模块名称
+                    module_name = self.eval(node.children[0])
+
+                    def import_module_and_set_env(module_name, env, import_all_names=False):
+                        # 检测本地目录是否有 <name>.loo 文件，如有 process 之
+                        module = import_loo_file(module_name, env, import_all_names)
+                        if module is not None:
+                            return module
+                        
+                        # 检测本地目录是否有 <name>.py 文件，如有 import 之
+                        module = import_py_file(module_name, env, import_all_names)
+                        if module is not None:
+                            return module
+                        
+                        # 检测是否是 python 内部模块的名字，如有 import 之
+                        module = import_builtin_module(module_name, env, import_all_names)
+                        if module is not None:
+                            return module
+                        
+                        return None
+
+                    def import_loo_file(module_name, env, import_all_names):
+                        loo_file = f"{module_name}.loo"
+                        if os.path.exists(loo_file):
+                            module = self.process_file(loo_file, env)
+                            if import_all_names:
+                                for name in dir(module):
+                                    if not name.startswith("_"):  # 忽略私有属性
+                                        env.set(name, getattr(module, name))
+                            else:
+                                env.set(module_name, module)
+                            return module
+                        return None
+
+                    def import_py_file(module_name, env, import_all_names):
+                        py_file = f"{module_name}.py"
+                        if os.path.exists(py_file):
+                            spec = importlib.util.spec_from_file_location(module_name, py_file)
+                            module = importlib.util.module_from_spec(spec)
+                            spec.loader.exec_module(module)
+                            if import_all_names:
+                                # 遍历模块中的所有名称并设置到 env
+                                for name in dir(module):
+                                    if not name.startswith("_"):  # 忽略私有属性
+                                        env.set(name, getattr(module, name))
+                            else:
+                                env.set(module_name, module)
+                            return module
+                        return None
+
+                    def import_builtin_module(module_name, env, import_all_names):
+                        try:
+                            module = __import__(module_name)
+                            if import_all_names:
+                                # 遍历模块中的所有名称并设置到 env
+                                for name in dir(module):
+                                    if not name.startswith("_"):  # 忽略私有属性
+                                        env.set(name, getattr(module, name))
+                            else:
+                                env.set(module_name, module)
+                            return module
+                        except ImportError:
+                            pass
+                        return None
+
+                    import_module_and_set_env(module_name, env, False)
 
             elif node.data== 'let_stmt':
                 value = self.eval(node.children[1], env)
@@ -252,10 +334,11 @@ class VirtualMachine:
                 return array[index]
             elif node.data == 'prop_access':
                 obj = self.eval(node.children[0], env)
-                if isinstance(obj, types.ModuleType):
-                    return getattr(obj, node.children[1].value)
-                else:
+                if isinstance(obj, dict):
                     return obj[node.children[1].value]
+                else:
+                    return getattr(obj, node.children[1].value)
+
 
             elif node.data== 'list':
                 return [self.eval(item, env) for item in node.children]
@@ -412,7 +495,7 @@ class VirtualMachine:
             elif node.type == 'STRING':
                 return node.value[1:-1]
             elif node.type == 'NAME':
-                exists,value = env.lookup(node.value)
+                exists, value = env.lookup(node.value)
                 if not exists:
                     raise NameError(f"Variable '{node.value}' not defined in the environment.")
                 return value
@@ -434,7 +517,6 @@ def main():
     if args.filename:
         result = vm.process_file(args.filename, None, args.debug)
         print(pretty_var(result))
-
     else:
         # Interactive mode if no filename is provided
         while True:

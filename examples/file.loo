@@ -1,0 +1,5 @@
+@_;
+
+let f=_.open("examples\\file.loo","r");
+let c=f.read();
+c

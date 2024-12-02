@@ -24,7 +24,7 @@ statements: (statement)* expr
         //  | assign_multi_stmt
          | func_def
          | expr ";"
-import_stmt: "import" STRING ";"
+import_stmt: "@" NAME MUL? ";"
 
 let_stmt: "let" NAME "=" expr ";"
 let_multi_stmt: "let" "[" NAME ("," NAME)* "]" "=" expr ";"
