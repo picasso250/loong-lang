@@ -1,4 +1,4 @@
-import argparse
+import argparse,os,types
 from colorama import init
 from termcolor import colored
 from loongast import *
@@ -36,6 +36,17 @@ class Env:
 class VirtualMachine:
     def __init__(self):
         self.global_env = Env()  # Global environment
+    def process_file(self, filename, env = None, debug=False):
+        if env is None:
+            env = self.global_env  # Default to global environment
+        # Read the file if a filename is provided
+        with open(filename, 'r', encoding='utf-8') as file:
+            code = file.read()
+        ast = parser.parse(code)
+        if debug:
+            print(colored(ast.pretty(), 'grey'))
+        result = self.eval(ast, env)
+        return result
     def add_operator(self, left, right, env):
         if isinstance(left, (int, float)):
             result = left + right
@@ -131,6 +142,10 @@ class VirtualMachine:
         return result
 
     def handle_function_call(self, func_def, arg_values, env):
+        # Check if func_def is a native Python function
+        if callable(func_def):
+            return func_def(*arg_values)
+        
         local_env = Env(parent=func_def.env)
         for i in range(len(func_def.params)):
             local_env.set(func_def.params[i].value, arg_values[i])
@@ -140,6 +155,7 @@ class VirtualMachine:
             result = self.eval(stmt, local_env)
         # print("return", result)
         return result
+
     def eval(self, node, env=None):
         if env is None:
             env = self.global_env  # Default to global environment
@@ -153,6 +169,32 @@ class VirtualMachine:
                 for statement in node.children:
                     result = self.eval(statement, env)
                 return result
+            elif node.data == 'import_stmt':
+                # 获取模块名称
+                module_name = self.eval(node.children[0])
+                # 1. 检测本地目录是否有 <name>.loo 文件，如有 process 之
+                loo_file = f"{module_name}.loo"
+                if os.path.exists(loo_file):
+                    self.process_file(loo_file, env)
+                    return None
+                # 2. 检测本地目录是否有 <name>.py 文件，如有 import 之
+                py_file = f"{module_name}.py"
+                if os.path.exists(py_file):
+                    import importlib.util
+                    spec = importlib.util.spec_from_file_location(module_name, py_file)
+                    module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(module)
+                    env.set(module_name, module)
+                    return module
+                # 3. 检测是否是 python 内部模块的名字，如有 import 之
+                try:
+                    module = __import__(module_name)
+                    env.set(module_name, module)
+                    return module
+                except ImportError:
+                    pass
+                return None
+
             elif node.data== 'let_stmt':
                 value = self.eval(node.children[1], env)
                 target = node.children[0].value
@@ -208,9 +250,13 @@ class VirtualMachine:
                 array = self.eval(node.children[0], env)
                 index = self.eval(node.children[1], env)
                 return array[index]
-            elif node.data== 'prop_access':
+            elif node.data == 'prop_access':
                 obj = self.eval(node.children[0], env)
-                return obj[node.children[1].value]
+                if isinstance(obj, types.ModuleType):
+                    return getattr(obj, node.children[1].value)
+                else:
+                    return obj[node.children[1].value]
+
             elif node.data== 'list':
                 return [self.eval(item, env) for item in node.children]
             elif node.data== 'dict':
@@ -386,19 +432,14 @@ def main():
     vm = VirtualMachine()
     
     if args.filename:
-        # Read the file if a filename is provided
-        with open(args.filename, 'r', encoding='utf-8') as file:
-            code = file.read()
-        ast = parser.parse(code)
-        if args.debug:
-            print(colored(ast.pretty(), 'grey'))
-        result = vm.eval(ast)
+        result = vm.process_file(args.filename, None, args.debug)
         print(pretty_var(result))
+
     else:
         # Interactive mode if no filename is provided
         while True:
             try:
-                text = input('loong > ')
+                # text = input('loong > ')
                 # text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
                 # text = ' [1,2,3] @ (x=>x+1) >? (x=>x%2==0)  @ x=>x*2 '
                 # text = ' [["a",1]] @ {k,v=>k,v} '
@@ -406,6 +447,7 @@ def main():
                 # text = 'a@f@g'
                 # text = 'let [a,b]=[2,3];a+b'
                 # text = 'let 中=1;中'
+                text = 'import "json"; json.dumps([1])'
             except EOFError:
                 break
             if text:
@@ -414,7 +456,7 @@ def main():
                     print(colored(ast.pretty(), 'grey'))
                 result = vm.eval(ast)
                 print(pretty_var(result))
-                # break
+                break
 
 if __name__ == '__main__':
     main()

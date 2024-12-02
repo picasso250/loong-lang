@@ -18,12 +18,13 @@ NAME: ("_"|LETTER|CHINESE_CHAR) ("_"|LETTER|CHINESE_CHAR|DIGIT)*
 
 statements: (statement)* expr
 
-?statement: let_stmt
+?statement: import_stmt | let_stmt
     | let_multi_stmt
          | assign_stmt
         //  | assign_multi_stmt
          | func_def
          | expr ";"
+import_stmt: "import" STRING ";"
 
 let_stmt: "let" NAME "=" expr ";"
 let_multi_stmt: "let" "[" NAME ("," NAME)* "]" "=" expr ";"
