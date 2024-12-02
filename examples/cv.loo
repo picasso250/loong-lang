@@ -1,4 +1,4 @@
-import "cv2";
+@cv2;
 
 # 读取图像
 let image = cv2.imread("examples\\a.png");

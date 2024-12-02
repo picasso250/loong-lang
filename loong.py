@@ -201,7 +201,8 @@ class VirtualMachine:
                     result = self.eval(statement, env)
                 return result
             elif node.data == 'import_stmt':
-                if node.children[0].value == '_':
+                module_name = node.children[0].value
+                if module_name == '_':
                     # 遍历所有内置名称并设置到 env
                     for name in dir(builtins):
                         if not name.startswith("_"):  # 忽略私有名称
@@ -209,9 +210,6 @@ class VirtualMachine:
                             env.set(name, getattr(builtins, name))
                     env.set("_", builtins)
                 else:
-
-                    # 获取模块名称
-                    module_name = self.eval(node.children[0])
 
                     def import_module_and_set_env(module_name, env, import_all_names=False):
                         # 检测本地目录是否有 <name>.loo 文件，如有 process 之
