@@ -405,6 +405,7 @@ def main():
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
                 # text = 'let [a,b]=[2,3];a+b'
+                # text = 'let 中=1;中'
             except EOFError:
                 break
             if text:

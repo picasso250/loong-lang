@@ -1,11 +1,18 @@
 %import common.ESCAPED_STRING   -> STRING
 %import common.SIGNED_NUMBER    -> NUMBER
-%import common.CNAME            -> NAME
+%import common.LETTER
+%import common.DIGIT
+
 %import common.WS
 %ignore WS
 
 %import common.SH_COMMENT
 %ignore SH_COMMENT
+
+// 中文字符范围（排除中文空格等特殊符号）
+CHINESE_CHAR: /[\u4e00-\u9fa5]/
+
+NAME: ("_"|LETTER|CHINESE_CHAR) ("_"|LETTER|CHINESE_CHAR|DIGIT)*
 
 ?start: statements
 
