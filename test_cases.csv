@@ -1,45 +1,45 @@
-代码                                           	期望结果
--                                              	基本功能
-let a = 10; a + 5                              	15                 	
-10 > 5 ? 1 : 0                                 	1
-10 < 5 ? 1 : 0                                 	0
--                                              	新增测试
-(1 + 2) * (3 + 4)                              	21                 	
-10 == 5                                        	False
--                                              	字符串测试
-let x = "Hello, "; x + "world!"                	"Hello, world!"    	
--                                              	小数测试
-let a = 3.14; a + 2.71                         	5.85               	
-let b = 2.0; b * 3.5                           	7.0
-let c = 1.5; c / 0.5                           	3.0
--                                              	函数定义与调用测试
-def add(a, b): a + b end add(2, 3)             	5                  	
-def mul(a, b): a * b end mul(4, 5)             	20
-def square(x): x * x end square(6)             	36
-def identity(x): x end identity(42)            	42
--                                              	数组测试
-let arr = [1, 2, 3]; arr[0] + arr[1]           	3                  	
-arr[1] * arr[2]                                	6
+代码                                        	期望结果
+-                                           	基本功能
+let a = 10; a + 5                           	15                 	
+10 > 5 ? 1 : 0                              	1
+10 < 5 ? 1 : 0                              	0
+-                                           	新增测试
+(1 + 2) * (3 + 4)                           	21                 	
+10 == 5                                     	False
+-                                           	字符串测试
+let x = "Hello, "; x + "world!"             	"Hello, world!"    	
+-                                           	小数测试
+let a = 3.14; a + 2.71                      	5.85               	
+let b = 2.0; b * 3.5                        	7.0
+let c = 1.5; c / 0.5                        	3.0
+-                                           	函数定义与调用测试
+def add(a, b): a + b end add(2, 3)          	5                  	
+def mul(a, b): a * b end mul(4, 5)          	20
+def square(x): x * x end square(6)          	36
+def identity(x): x end identity(42)         	42
+-                                           	数组测试
+let arr = [1, 2, 3]; arr[0] + arr[1]        	3                  	
+arr[1] * arr[2]                             	6
 -
-let arr = [10, 20, 30]; arr[0] + arr[2]        	40
-let b = [1, 2] + [3, 4]; b[3]                  	4
--                                              	属性访问测试
-let obj = {name: "Loong", age: 5}; obj.name    	"Loong"            	
-obj.name = "LoongAI"; obj.name                 	"LoongAI"          	
-obj.age                                        	5
-def getName(o): o.name end getName(obj)        	"LoongAI"
-obj.height = 15.5; obj.height                  	15.5
--                                              	lambda
-let id=x=>x; id(3)                             	3
-let f=def(a,b):a+b end; f(3,4)                 	7
--                                              	map/filter
-[1,2,3] @[ x=>x+1 ] >? (x=>x%2==0) @[ x=>x*2 ] 	[4, 8]
--                                              	中文变量名测试
-let 数字 = 10; 数字 + 5                        	15
-def 求和(a, b): a + b end 求和(1, 2)           	3
-let 数组 = [1, 2, 3]; 数组[0] + 数组[1]        	3
-let 对象 = {名字: "龙", 年龄: 5}; 对象.名字    	"龙"
-对象.年龄                                      	5
-对象.名字 = "龙AI"; 对象.名字                  	"龙AI"
--                                              	import
-import "json"; json.dumps([1])                 	"[1]"
+let arr = [10, 20, 30]; arr[0] + arr[2]     	40
+let b = [1, 2] + [3, 4]; b[3]               	4
+-                                           	属性访问测试
+let obj = {name: "Loong", age: 5}; obj.name 	"Loong"            	
+obj.name = "LoongAI"; obj.name              	"LoongAI"          	
+obj.age                                     	5
+def getName(o): o.name end getName(obj)     	"LoongAI"
+obj.height = 15.5; obj.height               	15.5
+-                                           	lambda
+let id=x=>x; id(3)                          	3
+let f=def(a,b):a+b end; f(3,4)              	7
+-                                           	map/filter
+[1,2,3] |> (x=>x+1) |? (x=>x%2==0)            	[2,4]
+-                                           	中文变量名测试
+let 数字 = 10; 数字 + 5                     	15
+def 求和(a, b): a + b end 求和(1, 2)        	3
+let 数组 = [1, 2, 3]; 数组[0] + 数组[1]     	3
+let 对象 = {名字: "龙", 年龄: 5}; 对象.名字 	"龙"
+对象.年龄                                   	5
+对象.名字 = "龙AI"; 对象.名字               	"龙AI"
+-                                           	import
+import "json"; json.dumps([1])              	"[1]"

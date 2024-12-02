@@ -265,11 +265,11 @@ class VirtualMachine:
             
             elif node.data== 'map_expr':
                 operator = node.children[1].type
-                if operator == 'MAP_AT':
+                if operator == 'MAP':
                     lst = self.eval(node.children[0], env)
                     lmd = self.eval(node.children[2], env)
                     return [self.handle_function_call(lmd, [x], env) for x in lst]
-                elif operator == 'FILTER_IF':
+                elif operator == 'FILTER':
                     lst = self.eval(node.children[0], env)
                     lmd = self.eval(node.children[2], env)
                     return [x for x in lst if self.handle_function_call(lmd, [x], env)]
@@ -440,9 +440,7 @@ def main():
         while True:
             try:
                 text = input('loong > ')
-                # text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
-                # text = ' [1,2,3] @ (x=>x+1) >? (x=>x%2==0)  @ x=>x*2 '
-                # text = ' [["a",1]] @ {k,v=>k,v} '
+                # text = ' [1,2,3] |> (x=>x+1) |? (x=>x%2==0) '
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
                 # text = 'let [a,b]=[2,3];a+b'
