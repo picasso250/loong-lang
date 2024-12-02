@@ -439,7 +439,7 @@ def main():
         # Interactive mode if no filename is provided
         while True:
             try:
-                # text = input('loong > ')
+                text = input('loong > ')
                 # text = ' [1,2,3] @[ x=>x+1 ] >? ( x=>x%2==0 ) @[ x=>x*2 ]  '
                 # text = ' [1,2,3] @ (x=>x+1) >? (x=>x%2==0)  @ x=>x*2 '
                 # text = ' [["a",1]] @ {k,v=>k,v} '
@@ -447,7 +447,7 @@ def main():
                 # text = 'a@f@g'
                 # text = 'let [a,b]=[2,3];a+b'
                 # text = 'let 中=1;中'
-                text = 'import "json"; json.dumps([1])'
+                # text = 'import "json"; json.dumps([1])'
             except EOFError:
                 break
             if text:
@@ -456,7 +456,7 @@ def main():
                     print(colored(ast.pretty(), 'grey'))
                 result = vm.eval(ast)
                 print(pretty_var(result))
-                break
+                # break
 
 if __name__ == '__main__':
     main()
