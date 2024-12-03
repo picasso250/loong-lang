@@ -14,7 +14,7 @@
             "args": [
                 // "${command:pickArgs}"
                 // ".\\examples\\file.loo",
-                ".\\examples\\cv.loo",
+                // ".\\examples\\cv.loo",
                 "-d"
             ]
         }

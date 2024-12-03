@@ -202,6 +202,8 @@ class VirtualMachine:
                 return result
             elif node.data == 'import_stmt':
                 module_name = node.children[0].value
+                # 如果存在第二个，且为 *
+                import_all_names = (len(node.children) > 1 and node.children[1].value == '*')
                 if module_name == '_':
                     # 遍历所有内置名称并设置到 env
                     for name in dir(builtins):
@@ -210,7 +212,6 @@ class VirtualMachine:
                             env.set(name, getattr(builtins, name))
                     env.set("_", builtins)
                 else:
-
                     def import_module_and_set_env(module_name, env, import_all_names=False):
                         # 检测本地目录是否有 <name>.loo 文件，如有 process 之
                         module = import_loo_file(module_name, env, import_all_names)
@@ -273,7 +274,7 @@ class VirtualMachine:
                             pass
                         return None
 
-                    import_module_and_set_env(module_name, env, False)
+                    import_module_and_set_env(module_name, env, import_all_names)
 
             elif node.data== 'let_stmt':
                 value = self.eval(node.children[1], env)
@@ -519,13 +520,15 @@ def main():
         # Interactive mode if no filename is provided
         while True:
             try:
-                text = input('loong > ')
                 # text = ' [1,2,3] |> (x=>x+1) |? (x=>x%2==0) '
                 # text = 'a=>b=>a+b'
                 # text = 'a@f@g'
                 # text = 'let [a,b]=[2,3];a+b'
                 # text = 'let 中=1;中'
-                # text = 'import "json"; json.dumps([1])'
+                text = '@json; json.dumps([1])'
+                text = '@json*; dumps([1])'
+                if "DEBUGPY_RUNNING" not in os.environ:
+                    text = input('loong > ')
             except EOFError:
                 break
             if text:
