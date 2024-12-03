@@ -48,7 +48,7 @@ def test_loong():
     vm = VirtualMachine()
 
     # 从CSV文件加载测试用例
-    test_cases = parse_test_cases("test_cases.csv")
+    test_cases = parse_test_cases("test_cases.tsv")
 
     for i, test in enumerate(test_cases):
         try:
