@@ -19,11 +19,11 @@ NAME: ("_"|LETTER|CHINESE_CHAR) ("_"|LETTER|CHINESE_CHAR|DIGIT)*
 statements: (statement)* expr
 
 ?statement: import_stmt | let_stmt
-    | let_multi_stmt
-         | assign_stmt
+          | let_multi_stmt
+          | assign_stmt
         //  | assign_multi_stmt
-         | func_def
-         | expr ";"
+          | func_def
+          | expr ";"
 import_stmt: "@" NAME MUL? ";"
 
 let_stmt: "let" NAME "=" expr ";"
@@ -39,12 +39,12 @@ params: "(" [NAME ("," NAME)*] ")"
 ?expr: map_expr
 
 ?map_expr: func_expr
-    | map_expr MAP func_expr
-    | map_expr FILTER func_expr
+         | map_expr MAP func_expr
+         | map_expr FILTER func_expr
 
 ?func_expr: conditional_exp
-    | "def" params ":" statements "end"
-    | short_func_expr
+          | "def" params ":" statements "end"
+          | short_func_expr
 
 short_func_expr: NAME "=>" expr
 
@@ -53,66 +53,66 @@ pair: NAME ":" expr
 list: "[" [expr ("," expr)*] "]"
 
 ?conditional_exp: logical_or_exp
-               | logical_or_exp "?" expr ":" conditional_exp
+                | logical_or_exp "?" expr ":" conditional_exp
 
 ?logical_or_exp: logical_and_exp
-              | logical_or_exp "or" logical_and_exp
+               | logical_or_exp "or" logical_and_exp
 
 ?logical_and_exp: bitwise_exp
-               | logical_and_exp "and" bitwise_exp
+                | logical_and_exp "and" bitwise_exp
 
 ?bitwise_exp: equality_exp
-       | bitwise_exp BITWISE_AND equality_exp
-       | bitwise_exp BITWISE_XOR equality_exp
-       | bitwise_exp BITWISE_OR equality_exp
+            | bitwise_exp BITWISE_AND equality_exp
+            | bitwise_exp BITWISE_XOR equality_exp
+            | bitwise_exp BITWISE_OR equality_exp
 
 ?equality_exp: relational_exp
-            | equality_exp EQ relational_exp
-            | equality_exp NE relational_exp
+             | equality_exp EQ relational_exp
+             | equality_exp NE relational_exp
 
 ?relational_exp: shift_expression
-              | relational_exp LT shift_expression
-              | relational_exp GT shift_expression
-              | relational_exp LE shift_expression
-              | relational_exp GE shift_expression
+               | relational_exp LT shift_expression
+               | relational_exp GT shift_expression
+               | relational_exp LE shift_expression
+               | relational_exp GE shift_expression
 
 ?shift_expression: additive_exp
-                | shift_expression SHL additive_exp
-                | shift_expression SHR additive_exp
+                 | shift_expression SHL additive_exp
+                 | shift_expression SHR additive_exp
 
 ?additive_exp: mult_exp
-            | additive_exp ADD mult_exp
-            | additive_exp SUB mult_exp
+             | additive_exp ADD mult_exp
+             | additive_exp SUB mult_exp
 
 ?mult_exp: cast_exp
-        | mult_exp MUL cast_exp
-        | mult_exp DIV cast_exp
-        | mult_exp IDIV cast_exp
-        | mult_exp MOD cast_exp
+         | mult_exp MUL cast_exp
+         | mult_exp DIV cast_exp
+         | mult_exp IDIV cast_exp
+         | mult_exp MOD cast_exp
 
 ?cast_exp: unary_exp
 
 ?unary_exp: NOT expr
-         | SUB unary_exp
-         | ADD unary_exp
-         | BITWISE_NOT unary_exp
-         | postfix_exp
+          | SUB unary_exp
+          | ADD unary_exp
+          | BITWISE_NOT unary_exp
+          | postfix_exp
 
 ?postfix_exp: primary_exp
-           | func_call
-           | array_access
-           | prop_access
+            | func_call
+            | array_access
+            | prop_access
 
 func_call: postfix_exp "(" arg_list ")"
 array_access: postfix_exp "[" expr "]"
 prop_access: postfix_exp "." NAME
 
 ?primary_exp: "(" expr ")"
-           | STRING
-           | NAME
-           | const
-           | list
-           | dict
+            | STRING
+            | NAME
+            | const
+            | list
+            | dict
 
 arg_list: [expr ("," expr)*]
 
