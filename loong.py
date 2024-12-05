@@ -1,5 +1,5 @@
 import builtins
-import argparse,os,types
+import argparse, os
 from colorama import init
 from termcolor import colored
 from loongast import *
