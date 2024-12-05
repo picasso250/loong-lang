@@ -3,6 +3,7 @@ import argparse,os,types
 from colorama import init
 from termcolor import colored
 from loongast import *
+from operators import Operators
 
 from lark import Lark
 from lark.lexer import Token
@@ -37,6 +38,7 @@ class Env:
 class VirtualMachine:
     def __init__(self):
         self.global_env = Env()  # Global environment
+        self.operators = Operators(self)  # 创建运算符处理器实例
     def process_file(self, filename, env = None, debug=False):
         if env is None:
             env = self.global_env  # Default to global environment
@@ -48,100 +50,7 @@ class VirtualMachine:
             print(colored(ast.pretty(), 'grey'))
         result = self.eval(ast, env)
         return result
-    def add_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left + right
-        elif isinstance(left, str):
-            result = left + str(right)
-        elif isinstance(left, list):
-            if isinstance(right, list):
-                result = left + right
-            else:
-                raise TypeError("Cannot add non-list to a list")
-        elif isinstance(left, dict):
-            if '__add__' in left:
-                result = self.handle_function_call(left['__add__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be added directly unless they implement __add__")
-        else:
-            raise TypeError("Unsupported operand type(s) for +")
-        return result
-    def sub_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left - right
-        elif isinstance(left, dict):
-            if '__sub__' in left:
-                result = self.handle_function_call(left['__sub__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be subtracted directly unless they implement __sub__")
-        else:
-            raise TypeError("Unsupported operand type(s) for -")
-        return result
-
-    def mul_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left * right
-        elif isinstance(left, str):
-            result = left * right
-        elif isinstance(left, list):
-            result = left * right
-        elif isinstance(left, dict):
-            if '__mul__' in left:
-                result = self.handle_function_call(left['__mul__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be added directly unless they implement __mul__")
-        else:
-            raise TypeError("Unsupported operand type(s) for *")
-        return result
-
-    def div_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left / right
-        elif isinstance(left, dict):
-            if '__div__' in left:
-                result = self.handle_function_call(left['__div__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be divided directly unless they implement __div__")
-        else:
-            raise TypeError("Unsupported operand type(s) for /")
-        return result
-
-    def floordiv_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left // right
-        elif isinstance(left, dict):
-            if '__floordiv__' in left:
-                result = self.handle_function_call(left['__floordiv__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be floor divided directly unless they implement __floordiv__")
-        else:
-            raise TypeError("Unsupported operand type(s) for //")
-        return result
-
-    def pow_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left ** right
-        elif isinstance(left, dict):
-            if '__pow__' in left:
-                result = self.handle_function_call(left['__pow__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be powered directly unless they implement __pow__")
-        else:
-            raise TypeError("Unsupported operand type(s) for **")
-        return result
-
-    def mod_operator(self, left, right, env):
-        if isinstance(left, (int, float)):
-            result = left % right
-        elif isinstance(left, dict):
-            if '__mod__' in left:
-                result = self.handle_function_call(left['__mod__'], [left, right], env)
-            else:
-                raise TypeError("Dictionaries cannot be modulo divided directly unless they implement __mod__")
-        else:
-            raise TypeError("Unsupported operand type(s) for %")
-        return result
-
+    
     def handle_function_call(self, func_def, arg_values, env):
         # Check if func_def is a native Python function
         if callable(func_def):
@@ -365,22 +274,22 @@ class VirtualMachine:
                 operator = node.children[1].value  # 操作符在第二个子节点
                 right = self.eval(node.children[2], env)  # 右操作数
                 if operator == '+':
-                    result = self.add_operator(left, right, env)
+                    result = self.operators.add_operator(left, right, env)
                 elif operator == '-':
-                    result = self.sub_operator(left, right, env)
+                    result = self.operators.sub_operator(left, right, env)
                 return result
             elif node.data == 'mult_exp':  # 乘法表达式
                 left = self.eval(node.children[0], env)
                 operator = node.children[1].value  # 操作符在第二个子节点
                 right = self.eval(node.children[2], env)
                 if operator == '*':
-                    result = self.mul_operator(left, right, env)
+                    result = self.operators.mul_operator(left, right, env)
                 elif operator == '/':
-                    result = self.div_operator(left, right, env)
+                    result = self.operators.div_operator(left, right, env)
                 elif operator == '//':
-                    result = self.floordiv_operator(left, right, env)
+                    result = self.operators.floordiv_operator(left, right, env)
                 elif operator == '%':
-                    result = self.mod_operator(left, right, env)
+                    result = self.operators.mod_operator(left, right, env)
                 return result
             elif node.data == 'bitwise_exp':  # 位运算表达式
                 left = self.eval(node.children[0], env)
